@@ -3,7 +3,7 @@
  * Custom folder view for displaying issues in a dashboard format
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Container, 
@@ -16,7 +16,7 @@ import {
   Grid,
   Statistic,
   Card,
-  Button
+  Loader
 } from 'semantic-ui-react';
 import { FormattedDate } from '@plone/volto/components';
 import { flattenToAppURL } from '@plone/volto/helpers';
@@ -29,6 +29,8 @@ const IssuesFolderView = (props) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [sortBy, setSortBy] = useState('created');
+  const [issuesWithFullData, setIssuesWithFullData] = useState([]);
+  const [loading, setLoading] = useState(false);
   
   // Configuration
   const statusConfig = {
@@ -66,14 +68,63 @@ const IssuesFolderView = (props) => {
     { key: 'status', text: 'Status', value: 'status' }
   ];
 
-  // Get only Issue items
-  const issues = useMemo(() => {
+  // Get only Issue items from the folder
+  const issueItems = useMemo(() => {
     return (content.items || []).filter(item => item['@type'] === 'issue');
   }, [content.items]);
 
+  // Fetch full data for each issue to get creation dates
+  useEffect(() => {
+    const fetchIssuesData = async () => {
+      if (issueItems.length === 0) {
+        setIssuesWithFullData([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // Fetch data for all issues in parallel
+        const promises = issueItems.map(async (item) => {
+          try {
+            // Get the path from the @id and construct API URL
+            const path = flattenToAppURL(item['@id']);
+            const apiUrl = `/++api++${path}`;
+            
+            const response = await fetch(apiUrl, {
+              headers: {
+                'Accept': 'application/json',
+              },
+              credentials: 'same-origin',
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              return data;
+            }
+            // If fetch fails, return the original item
+            return item;
+          } catch (error) {
+            console.error('Error fetching issue data:', error);
+            return item;
+          }
+        });
+
+        const fullData = await Promise.all(promises);
+        setIssuesWithFullData(fullData);
+      } catch (error) {
+        console.error('Error fetching issues:', error);
+        setIssuesWithFullData(issueItems);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIssuesData();
+  }, [issueItems]);
+
   // Apply filters and sorting
   const filteredAndSortedIssues = useMemo(() => {
-    let filtered = issues;
+    let filtered = issuesWithFullData;
 
     // Status filter
     if (statusFilter !== 'all') {
@@ -112,12 +163,12 @@ const IssuesFolderView = (props) => {
     });
 
     return sorted;
-  }, [issues, statusFilter, priorityFilter, sortBy]);
+  }, [issuesWithFullData, statusFilter, priorityFilter, sortBy]);
 
   // Calculate statistics
   const stats = useMemo(() => {
     const counts = {
-      total: issues.length,
+      total: issuesWithFullData.length,
       new: 0,
       in_progress: 0,
       resolved: 0,
@@ -125,7 +176,7 @@ const IssuesFolderView = (props) => {
       high: 0
     };
 
-    issues.forEach(issue => {
+    issuesWithFullData.forEach(issue => {
       const status = issue.status?.token || issue.status;
       const priority = issue.priority?.token || issue.priority;
       
@@ -137,7 +188,7 @@ const IssuesFolderView = (props) => {
     });
 
     return counts;
-  }, [issues]);
+  }, [issuesWithFullData]);
 
   // Render issue row for table
   const renderIssueRow = (issue) => {
@@ -223,11 +274,17 @@ const IssuesFolderView = (props) => {
           {content.title}
         </Header>
         
-        {/* Statistics */}
-        <Segment>
-          <Grid>
-            <Grid.Row>
-              <Grid.Column mobile={8} tablet={3} computer={3}>
+        {loading ? (
+          <Segment basic textAlign="center">
+            <Loader active inline="centered">Loading issues...</Loader>
+          </Segment>
+        ) : (
+          <>
+            {/* Statistics */}
+            <Segment>
+              <Grid>
+                <Grid.Row>
+                  <Grid.Column mobile={8} tablet={3} computer={3}>
                 <Statistic size="small">
                   <Statistic.Value>{stats.total}</Statistic.Value>
                   <Statistic.Label>Total Issues</Statistic.Label>
@@ -251,10 +308,10 @@ const IssuesFolderView = (props) => {
                   <Statistic.Label>Resolved</Statistic.Label>
                 </Statistic>
               </Grid.Column>
-            </Grid.Row>
-            {(stats.critical > 0 || stats.high > 0) && (
-              <Grid.Row>
-                <Grid.Column width={16}>
+                </Grid.Row>
+                {(stats.critical > 0 || stats.high > 0) && (
+                  <Grid.Row>
+                    <Grid.Column width={16}>
                   {stats.critical > 0 && (
                     <Label color="red" size="large">
                       <Icon name="warning sign" />
@@ -267,14 +324,14 @@ const IssuesFolderView = (props) => {
                       {stats.high} High Priority Issue{stats.high !== 1 ? 's' : ''}
                     </Label>
                   )}
-                </Grid.Column>
-              </Grid.Row>
-            )}
-          </Grid>
-        </Segment>
+                    </Grid.Column>
+                  </Grid.Row>
+                )}
+              </Grid>
+            </Segment>
 
-        {/* Filters */}
-        <Segment>
+            {/* Filters */}
+            <Segment>
           <Grid>
             <Grid.Row>
               <Grid.Column mobile={16} tablet={5} computer={5}>
@@ -310,19 +367,19 @@ const IssuesFolderView = (props) => {
               </Grid.Column>
             </Grid.Row>
           </Grid>
-        </Segment>
+            </Segment>
 
-        {/* Issues List */}
-        {filteredAndSortedIssues.length === 0 ? (
-          <Segment placeholder>
-            <Header icon>
-              <Icon name="search" />
-              No issues found matching your filters.
-            </Header>
-          </Segment>
-        ) : (
-          <>
-            {/* Desktop Table View */}
+            {/* Issues List */}
+            {filteredAndSortedIssues.length === 0 ? (
+              <Segment placeholder>
+                <Header icon>
+                  <Icon name="search" />
+                  No issues found matching your filters.
+                </Header>
+              </Segment>
+            ) : (
+              <>
+                {/* Desktop Table View */}
             <div className="desktop-only">
               <Table celled selectable>
                 <Table.Header>
@@ -347,6 +404,8 @@ const IssuesFolderView = (props) => {
               </Card.Group>
             </div>
           </>
+        )}
+        </>
         )}
       </Segment>
     </Container>
