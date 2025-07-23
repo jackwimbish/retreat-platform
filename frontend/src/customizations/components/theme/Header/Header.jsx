@@ -15,7 +15,6 @@ const Header = ({ pathname }) => {
 
   return (
     <Segment basic className="header-wrapper" role="banner">
-      <h1>Hello, Retreat Platform!</h1>
       <Container>
         <div className="header">
           <div className="logo-nav-wrapper">

@@ -1,0 +1,213 @@
+/* Homepage Dashboard Styles */
+.homepage-dashboard {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+/* Welcome Section */
+.welcome-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.welcome-section h1 {
+  color: #2e3e4e;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-section h1 .icon {
+  color: #f2b705;
+}
+
+.date-display {
+  color: #687078;
+  font-size: 1.1rem;
+}
+
+.date-display .icon {
+  margin-right: 0.5rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+  margin-bottom: 2rem !important;
+}
+
+.stat-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card .statistic {
+  margin: 0 !important;
+}
+
+.stat-card .statistic .icon {
+  margin-right: 0.5rem;
+  color: #4183c4;
+}
+
+.stat-card.new .statistic .value {
+  color: #db2828 !important;
+}
+
+.stat-card.progress .statistic .value {
+  color: #fbbd08 !important;
+}
+
+.stat-card.alerts .statistic .value {
+  color: #f2711c !important;
+}
+
+/* Quick Links Section */
+.quick-links-section {
+  margin-bottom: 2rem;
+  background-color: #f8f9fa;
+}
+
+.quick-links-section h2 {
+  color: #2e3e4e;
+  margin-bottom: 1.5rem;
+}
+
+.action-card {
+  transition: all 0.3s ease;
+  border: 2px solid transparent !important;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #4183c4 !important;
+}
+
+.action-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-card.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent !important;
+}
+
+.action-card .header {
+  margin-top: 1rem !important;
+  color: #2e3e4e;
+}
+
+.action-card .description {
+  color: #687078;
+}
+
+/* Recent Issues */
+.recent-issues h2 {
+  color: #2e3e4e;
+  margin-bottom: 1rem;
+}
+
+.recent-issues .list .header {
+  color: #2e3e4e;
+  font-weight: 600;
+}
+
+.recent-issues .list .description {
+  margin-top: 0.5rem;
+}
+
+.recent-issues .issue-date {
+  float: right;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.recent-issues .ui.label {
+  margin-left: 0.5rem;
+}
+
+/* Quick Actions Sidebar */
+.quick-actions h3,
+.upcoming-features h3 {
+  color: #2e3e4e;
+  font-size: 1.2rem;
+}
+
+.quick-actions .button {
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+.quick-actions .button .icon {
+  margin-right: 0.5rem;
+}
+
+.upcoming-features {
+  background-color: #f8f9fa;
+}
+
+.upcoming-features .list .item {
+  padding: 0.5rem 0;
+}
+
+.upcoming-features .list .icon {
+  color: #4183c4;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 767px) {
+  .homepage-dashboard {
+    padding-top: 1rem;
+  }
+  
+  .welcome-section {
+    text-align: left;
+  }
+  
+  .stats-grid .column {
+    margin-bottom: 1rem !important;
+  }
+  
+  .action-card {
+    min-height: 150px;
+  }
+  
+  .recent-issues .issue-date {
+    display: block;
+    float: none;
+    margin-top: 0.25rem;
+  }
+}
+
+/* Loading States */
+.homepage-dashboard .ui.loader {
+  margin: 2rem auto;
+}
+
+/* Earth tone accents */
+.homepage-dashboard .ui.green.button {
+  background-color: #5a8a3a;
+}
+
+.homepage-dashboard .ui.green.button:hover {
+  background-color: #4a7a2a;
+}
+
+/* Print Styles */
+@media print {
+  .quick-actions,
+  .upcoming-features,
+  .action-card {
+    display: none;
+  }
+}
