@@ -1,18 +1,114 @@
-/* Issue View Styles */
-.issue-view {
+/* Issue View Professional Styles */
+.issue-view-professional {
   margin-top: 2rem;
+  margin-bottom: 4rem;
 }
 
-.issue-view .ui.segment {
+/* Header Section */
+.issue-view-professional .issue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.issue-view-professional .header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.issue-view-professional .issue-title {
+  margin: 0 !important;
+  color: #2e3e4e;
+}
+
+.issue-view-professional .issue-title .icon {
+  color: #4183c4;
+}
+
+.issue-view-professional .status-badge {
+  margin-top: 0.5rem;
+}
+
+/* Action Buttons */
+.issue-view-professional .action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Cards and Segments */
+.issue-view-professional .ui.card,
+.issue-view-professional .ui.segment {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   margin-bottom: 1.5rem;
 }
 
-/* Status label animations */
-.issue-view .ui.label {
-  transition: all 0.3s ease;
+.issue-view-professional .ui.card:hover {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
 }
 
-.issue-view .ui.red.label {
+/* Issue Details Card */
+.issue-view-professional .ui.card .header {
+  color: #2e3e4e;
+  font-size: 1.2rem;
+}
+
+.issue-view-professional .ui.card .header .icon {
+  color: #4183c4;
+}
+
+.issue-view-professional .ui.list .header {
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.issue-view-professional .ui.list .description {
+  color: #2e3e4e;
+}
+
+/* Description Section */
+.issue-view-professional .issue-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #2e3e4e;
+}
+
+.issue-view-professional .issue-description p {
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.issue-view-professional .no-description {
+  color: #999;
+  font-style: italic;
+}
+
+/* Activity Placeholder */
+.issue-view-professional .activity-placeholder {
+  text-align: center;
+  padding: 3rem 0;
+  color: #999;
+}
+
+.issue-view-professional .activity-placeholder .icon {
+  margin-bottom: 1rem;
+  color: #ddd;
+}
+
+/* Quick Actions */
+.issue-view-professional .ui.vertical.fluid.button.group .button {
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+/* Status label animations */
+.issue-view-professional .ui.red.label.status-badge {
   animation: pulse 2s infinite;
 }
 
@@ -28,28 +124,65 @@
   }
 }
 
-/* Priority indicators */
-.issue-view .ui.label .icon {
-  margin-right: 0.5rem;
+/* Priority labels */
+.issue-view-professional .ui.label .icon {
+  margin-right: 0.3rem;
 }
 
-/* Issue description */
-.issue-view p {
-  white-space: pre-wrap;
+/* Messages */
+.issue-view-professional .ui.message {
+  margin-bottom: 1.5rem;
 }
 
-/* Resolution notes styling */
-.issue-view .ui.positive.message {
+.issue-view-professional .ui.positive.message {
   border-left: 4px solid #21ba45;
+}
+
+.issue-view-professional .ui.info.message {
+  border-left: 4px solid #2185d0;
+}
+
+/* Metadata */
+.issue-view-professional .ui.list.small {
+  font-size: 0.9rem;
+}
+
+.issue-view-professional .ui.list.small strong {
+  color: #666;
 }
 
 /* Mobile responsiveness */
 @media only screen and (max-width: 767px) {
-  .issue-view .ui.grid > .row > .column {
-    padding-bottom: 0.5rem !important;
+  .issue-view-professional .issue-header {
+    flex-direction: column;
   }
   
-  .issue-view .ui.label {
-    margin-bottom: 0.5rem;
+  .issue-view-professional .header-content {
+    width: 100%;
+  }
+  
+  .issue-view-professional .action-buttons {
+    width: 100%;
+  }
+  
+  .issue-view-professional .action-buttons .button {
+    flex: 1;
+  }
+  
+  .issue-view-professional .ui.grid > .row > .column {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .issue-view-professional .action-buttons,
+  .issue-view-professional .ui.message.info,
+  .issue-view-professional .activity-placeholder {
+    display: none;
+  }
+  
+  .issue-view-professional {
+    margin: 0;
   }
 }
