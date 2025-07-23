@@ -7,6 +7,17 @@
   margin-bottom: 1rem;
 }
 
+/* Path cell styling */
+.issues-folder-view .path-cell {
+  color: #666;
+  font-size: 0.95em;
+}
+
+.issues-folder-view .path-cell .icon {
+  margin-right: 0.3rem;
+  color: #999;
+}
+
 /* Statistics styling */
 .issues-folder-view .ui.statistics {
   margin: 0;
@@ -34,6 +45,20 @@
 .issues-folder-view .ui.cards > .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Card meta styling for multiple lines */
+.issues-folder-view .ui.card .meta > div {
+  margin-bottom: 0.25rem;
+  color: #666;
+}
+
+.issues-folder-view .ui.card .meta > div:last-child {
+  margin-bottom: 0;
+}
+
+.issues-folder-view .ui.card .meta .icon {
+  margin-right: 0.3rem;
 }
 
 /* Label spacing */

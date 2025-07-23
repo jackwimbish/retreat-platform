@@ -28,9 +28,11 @@ const IssuesFolderView = (props) => {
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [locationFilter, setLocationFilter] = useState('all');
   const [sortBy, setSortBy] = useState('created');
   const [issuesWithFullData, setIssuesWithFullData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [uniqueLocations, setUniqueLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Configuration
   const statusConfig = {
@@ -68,59 +70,54 @@ const IssuesFolderView = (props) => {
     { key: 'status', text: 'Status', value: 'status' }
   ];
 
-  // Get only Issue items from the folder
-  const issueItems = useMemo(() => {
-    return (content.items || []).filter(item => item['@type'] === 'issue');
-  }, [content.items]);
-
-  // Fetch full data for each issue to get creation dates
+  // Fetch all issues system-wide
   useEffect(() => {
-    const fetchIssuesData = async () => {
-      if (issueItems.length === 0) {
-        setIssuesWithFullData([]);
-        return;
-      }
-
+    const fetchAllIssues = async () => {
       setLoading(true);
       try {
-        // Fetch data for all issues in parallel
-        const promises = issueItems.map(async (item) => {
-          try {
-            // Get the path from the @id and construct API URL
-            const path = flattenToAppURL(item['@id']);
-            const apiUrl = `/++api++${path}`;
-            
-            const response = await fetch(apiUrl, {
-              headers: {
-                'Accept': 'application/json',
-              },
-              credentials: 'same-origin',
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              return data;
-            }
-            // If fetch fails, return the original item
-            return item;
-          } catch (error) {
-            console.error('Error fetching issue data:', error);
-            return item;
-          }
+        // Search for all issues in the system
+        const searchResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=created&metadata_fields=modified&metadata_fields=location&metadata_fields=status&metadata_fields=priority&b_size=1000&fullobjects=true', {
+          headers: {
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
         });
-
-        const fullData = await Promise.all(promises);
-        setIssuesWithFullData(fullData);
+        
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          const issues = searchData.items || [];
+          
+          // Process issues to add parent path information
+          const processedIssues = issues.map(issue => {
+            // Extract parent path from the @id
+            const fullPath = issue['@id'];
+            const pathParts = fullPath.split('/').filter(p => p);
+            // Remove the domain and the issue itself to get parent path
+            const parentParts = pathParts.slice(pathParts.indexOf('Plone') + 1, -1);
+            const parentPath = parentParts.length > 0 ? parentParts.join(' > ') : 'Home';
+            
+            return {
+              ...issue,
+              parentPath: parentPath
+            };
+          });
+          
+          setIssuesWithFullData(processedIssues);
+          
+          // Extract unique locations
+          const locations = [...new Set(processedIssues.map(i => i.location).filter(Boolean))];
+          setUniqueLocations(locations.sort());
+        }
       } catch (error) {
         console.error('Error fetching issues:', error);
-        setIssuesWithFullData(issueItems);
+        setIssuesWithFullData([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchIssuesData();
-  }, [issueItems]);
+    fetchAllIssues();
+  }, []); // Only run once on mount
 
   // Apply filters and sorting
   const filteredAndSortedIssues = useMemo(() => {
@@ -137,6 +134,13 @@ const IssuesFolderView = (props) => {
     if (priorityFilter !== 'all') {
       filtered = filtered.filter(issue => 
         (issue.priority?.token || issue.priority) === priorityFilter
+      );
+    }
+
+    // Location filter
+    if (locationFilter !== 'all') {
+      filtered = filtered.filter(issue => 
+        issue.location === locationFilter
       );
     }
 
@@ -163,7 +167,7 @@ const IssuesFolderView = (props) => {
     });
 
     return sorted;
-  }, [issuesWithFullData, statusFilter, priorityFilter, sortBy]);
+  }, [issuesWithFullData, statusFilter, priorityFilter, locationFilter, sortBy]);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -217,6 +221,10 @@ const IssuesFolderView = (props) => {
           </Label>
         </Table.Cell>
         <Table.Cell>{issue.location || 'Not specified'}</Table.Cell>
+        <Table.Cell className="path-cell">
+          <Icon name="folder outline" />
+          {issue.parentPath || 'Home'}
+        </Table.Cell>
         <Table.Cell>
           {issue.created ? (
             <FormattedDate date={issue.created} />
@@ -240,8 +248,14 @@ const IssuesFolderView = (props) => {
         <Card.Content>
           <Card.Header>{issue.title}</Card.Header>
           <Card.Meta>
-            <Icon name="map marker alternate" />
-            {issue.location || 'Not specified'}
+            <div>
+              <Icon name="map marker alternate" />
+              {issue.location || 'Not specified'}
+            </div>
+            <div>
+              <Icon name="folder outline" />
+              {issue.parentPath || 'Home'}
+            </div>
           </Card.Meta>
           <Card.Description>
             {issue.description}
@@ -332,41 +346,58 @@ const IssuesFolderView = (props) => {
 
             {/* Filters */}
             <Segment>
-          <Grid>
-            <Grid.Row>
-              <Grid.Column mobile={16} tablet={5} computer={5}>
-                <Dropdown
-                  placeholder="Filter by Status"
-                  fluid
-                  selection
-                  options={statusOptions}
-                  value={statusFilter}
-                  onChange={(e, { value }) => setStatusFilter(value)}
-                />
-              </Grid.Column>
-              <Grid.Column mobile={16} tablet={5} computer={5}>
-                <Dropdown
-                  placeholder="Filter by Priority"
-                  fluid
-                  selection
-                  options={priorityOptions}
-                  value={priorityFilter}
-                  onChange={(e, { value }) => setPriorityFilter(value)}
-                />
-              </Grid.Column>
-              <Grid.Column mobile={16} tablet={6} computer={6}>
-                <Dropdown
-                  placeholder="Sort by"
-                  fluid
-                  selection
-                  options={sortOptions}
-                  value={sortBy}
-                  onChange={(e, { value }) => setSortBy(value)}
-                  icon="sort"
-                />
-              </Grid.Column>
-            </Grid.Row>
-          </Grid>
+              <Grid>
+                <Grid.Row>
+                  <Grid.Column mobile={16} tablet={4} computer={4}>
+                    <Dropdown
+                      placeholder="Filter by Status"
+                      fluid
+                      selection
+                      options={statusOptions}
+                      value={statusFilter}
+                      onChange={(e, { value }) => setStatusFilter(value)}
+                    />
+                  </Grid.Column>
+                  <Grid.Column mobile={16} tablet={4} computer={4}>
+                    <Dropdown
+                      placeholder="Filter by Priority"
+                      fluid
+                      selection
+                      options={priorityOptions}
+                      value={priorityFilter}
+                      onChange={(e, { value }) => setPriorityFilter(value)}
+                    />
+                  </Grid.Column>
+                  <Grid.Column mobile={16} tablet={4} computer={4}>
+                    <Dropdown
+                      placeholder="Filter by Location"
+                      fluid
+                      selection
+                      options={[
+                        { key: 'all', text: 'All Locations', value: 'all' },
+                        ...uniqueLocations.map(loc => ({
+                          key: loc,
+                          text: loc,
+                          value: loc
+                        }))
+                      ]}
+                      value={locationFilter}
+                      onChange={(e, { value }) => setLocationFilter(value)}
+                    />
+                  </Grid.Column>
+                  <Grid.Column mobile={16} tablet={4} computer={4}>
+                    <Dropdown
+                      placeholder="Sort by"
+                      fluid
+                      selection
+                      options={sortOptions}
+                      value={sortBy}
+                      onChange={(e, { value }) => setSortBy(value)}
+                      icon="sort"
+                    />
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
             </Segment>
 
             {/* Issues List */}
@@ -387,7 +418,8 @@ const IssuesFolderView = (props) => {
                     <Table.HeaderCell>Issue</Table.HeaderCell>
                     <Table.HeaderCell width={2}>Status</Table.HeaderCell>
                     <Table.HeaderCell width={2}>Priority</Table.HeaderCell>
-                    <Table.HeaderCell width={3}>Location</Table.HeaderCell>
+                    <Table.HeaderCell width={2}>Location</Table.HeaderCell>
+                    <Table.HeaderCell width={3}>Path</Table.HeaderCell>
                     <Table.HeaderCell width={2}>Created</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>

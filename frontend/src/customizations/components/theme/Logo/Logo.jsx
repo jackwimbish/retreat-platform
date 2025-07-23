@@ -28,7 +28,7 @@ const Logo = () => {
 
   return (
     <Link
-      to={flattenToAppURL(site?.['@id'] || '/')}
+      to="/"
       aria-label={intl.formatMessage(messages.site)}
       title={intl.formatMessage(messages.site)}
       className="camp-coordinator-logo"
