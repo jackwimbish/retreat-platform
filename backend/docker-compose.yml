@@ -1,0 +1,18 @@
+services:
+  backend:
+    image: plone/plone-backend:6.1
+    ports:
+      - "8080:8080"
+    environment:
+      - SITE=Plone
+      - CORS_ALLOW_ORIGIN=http://localhost:3000
+      - CORS_ALLOW_METHODS=GET,POST,PUT,DELETE,OPTIONS
+      - CORS_ALLOW_CREDENTIALS=true
+      - DEFAULT_LANGUAGE=en
+    volumes:
+      # Store data in a volume
+      - plone_data:/data
+    restart: unless-stopped
+
+volumes:
+  plone_data:

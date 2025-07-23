@@ -25,6 +25,17 @@ bin/
 eggs/
 .installed.cfg
 .mr.developer.cfg
+venv
+backend/venv
+
+# Plone instance files
+backend/instance/var/
+backend/instance/etc/*.pid
+backend/instance/etc/*.lock
+backend/instance/parts/
+backend/instance/bin/
+backend/instance/*.cfg
+backend/instance/temp_*.py
 
 # IDE and Editor files
 .vscode/
