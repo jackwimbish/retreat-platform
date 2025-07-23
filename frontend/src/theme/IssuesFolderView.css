@@ -1,0 +1,88 @@
+/* Issues Folder View Styles */
+.issues-folder-view {
+  margin-top: 2rem;
+}
+
+.issues-folder-view .ui.segment {
+  margin-bottom: 1rem;
+}
+
+/* Statistics styling */
+.issues-folder-view .ui.statistics {
+  margin: 0;
+}
+
+.issues-folder-view .ui.statistic > .value {
+  font-size: 2em !important;
+}
+
+/* Table hover effects */
+.issues-folder-view .ui.table tbody tr:hover {
+  background-color: #f8f8f8;
+  cursor: pointer;
+}
+
+.issues-folder-view .ui.table tbody tr:hover a {
+  color: #1e70bf;
+}
+
+/* Card styling */
+.issues-folder-view .ui.cards > .card {
+  transition: transform 0.2s;
+}
+
+.issues-folder-view .ui.cards > .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Label spacing */
+.issues-folder-view .ui.label {
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Filter dropdowns */
+.issues-folder-view .ui.dropdown {
+  margin-bottom: 0.5rem;
+}
+
+/* Critical/High priority emphasis */
+.issues-folder-view .ui.large.label .icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Responsive display utilities */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Mobile responsiveness */
+@media only screen and (max-width: 767px) {
+  .desktop-only {
+    display: none;
+  }
+  
+  .mobile-only {
+    display: block;
+  }
+  
+  .issues-folder-view .ui.statistics .statistic {
+    margin-bottom: 1rem !important;
+  }
+  
+  .issues-folder-view .ui.grid > .row {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+}

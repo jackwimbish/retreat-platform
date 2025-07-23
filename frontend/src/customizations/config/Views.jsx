@@ -18,8 +18,10 @@ import Unauthorized from '@plone/volto/components/theme/Unauthorized/Unauthorize
 import Forbidden from '@plone/volto/components/theme/Forbidden/Forbidden';
 import ServerError from '@plone/volto/components/theme/Error/ServerError';
 
-// Import our custom view
+// Import our custom views
 import IssueView from '../components/theme/View/IssueView';
+import IssuesFolderView from '../components/theme/View/IssuesFolderView';
+import SmartDocumentView from '../components/theme/View/SmartDocumentView';
 
 const EventView = loadable(() =>
   import('@plone/volto/components/theme/View/EventView'),
@@ -90,6 +92,10 @@ defineMessages({
     id: 'Default view',
     defaultMessage: 'Default view',
   },
+  issues_dashboard_view: {
+    id: 'Issues Dashboard',
+    defaultMessage: 'Issues Dashboard',
+  },
 });
 
 // Layout View Registry
@@ -100,6 +106,7 @@ export const layoutViews = {
   listing_view: ListingView,
   link_redirect_view: LinkView,
   album_view: AlbumView,
+  issues_dashboard_view: IssuesFolderView,
 };
 
 // Content Types View Registry
@@ -110,6 +117,7 @@ export const contentTypesViews = {
   Image: ImageView,
   Event: EventView,
   issue: IssueView,  // Register our custom Issue view
+  Document: SmartDocumentView,  // Smart view that auto-detects Issues
 };
 
 // Default view
@@ -142,4 +150,5 @@ export const layoutViewsNamesMapping = {
   event_view: 'Event view',
   view: 'Default view',
   default: 'Default view',
+  issues_dashboard_view: 'Issues Dashboard',
 };
