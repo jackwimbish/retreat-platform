@@ -8,6 +8,7 @@ import os
 import sys
 import subprocess
 from pathlib import Path
+import time
 
 # Configuration
 INSTANCE_DIR = Path(__file__).parent / "instance"
@@ -100,6 +101,22 @@ if 'Plone' not in app.objectIds():
     )
     transaction.commit()
     print("✓ Site created successfully!")
+    
+    # Install Volto addon
+    print("Installing Volto addon...")
+    from Products.CMFCore.utils import getToolByName
+    setup_tool = getToolByName(site, 'portal_setup')
+    
+    # Import the Volto profile
+    try:
+        from zope.site.hooks import setSite
+        setSite(site)
+        setup_tool.runAllImportStepsFromProfile('profile-plone.volto:default')
+        transaction.commit()
+        print("✓ Volto addon installed successfully!")
+    except Exception as e:
+        print(f"Warning: Could not install Volto automatically: {e}")
+        print("You can install it manually through the web interface.")
 else:
     print("Site already exists")
 '''
@@ -113,6 +130,10 @@ else:
         
         # Clean up
         init_file.unlink()
+        
+        # Wait a moment for the site to be fully initialized
+        print("\nWaiting for site initialization to complete...")
+        time.sleep(2)
     
     # Set CORS environment variables
     env = os.environ.copy()
