@@ -1,0 +1,55 @@
+/* Issue View Styles */
+.issue-view {
+  margin-top: 2rem;
+}
+
+.issue-view .ui.segment {
+  margin-bottom: 1.5rem;
+}
+
+/* Status label animations */
+.issue-view .ui.label {
+  transition: all 0.3s ease;
+}
+
+.issue-view .ui.red.label {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Priority indicators */
+.issue-view .ui.label .icon {
+  margin-right: 0.5rem;
+}
+
+/* Issue description */
+.issue-view p {
+  white-space: pre-wrap;
+}
+
+/* Resolution notes styling */
+.issue-view .ui.positive.message {
+  border-left: 4px solid #21ba45;
+}
+
+/* Mobile responsiveness */
+@media only screen and (max-width: 767px) {
+  .issue-view .ui.grid > .row > .column {
+    padding-bottom: 0.5rem !important;
+  }
+  
+  .issue-view .ui.label {
+    margin-bottom: 0.5rem;
+  }
+}
