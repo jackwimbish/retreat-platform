@@ -41,7 +41,7 @@ const HomepageView = (props) => {
     const fetchIssuesData = async () => {
       try {
         // Fetch recent issues
-        const recentResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=created&metadata_fields=modified&sort_on=created&sort_order=descending&b_size=5', {
+        const recentResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=created&metadata_fields=modified&metadata_fields=status&metadata_fields=priority&metadata_fields=location&sort_on=created&sort_order=descending&b_size=5', {
           headers: {
             'Accept': 'application/json',
           },
@@ -86,16 +86,11 @@ const HomepageView = (props) => {
   }, []);
 
   const today = new Date();
-  const greeting = currentUser?.fullname || currentUser?.username || 'Camp Administrator';
 
   return (
     <Container className="homepage-dashboard">
-      {/* Welcome Section */}
+      {/* Date Section */}
       <Segment basic className="welcome-section">
-        <Header as="h1">
-          <Icon name="sun" />
-          Welcome back, {greeting}!
-        </Header>
         <p className="date-display">
           <Icon name="calendar" />
           <FormattedDate date={today} format={{
@@ -160,7 +155,7 @@ const HomepageView = (props) => {
           <Icon name="lightning" />
           Quick Actions
         </Header>
-        <Grid stackable columns={3}>
+        <Grid stackable columns={2}>
           <Grid.Column>
             <Card fluid as={Link} to="/issues" className="action-card">
               <Card.Content textAlign="center">
@@ -168,17 +163,6 @@ const HomepageView = (props) => {
                 <Card.Header>Issues Dashboard</Card.Header>
                 <Card.Description>
                   View and manage all maintenance issues
-                </Card.Description>
-              </Card.Content>
-            </Card>
-          </Grid.Column>
-          <Grid.Column>
-            <Card fluid as={Link} to="/++add++issue" className="action-card">
-              <Card.Content textAlign="center">
-                <Icon name="plus circle" size="huge" color="green" />
-                <Card.Header>Create New Issue</Card.Header>
-                <Card.Description>
-                  Report a new maintenance issue
                 </Card.Description>
               </Card.Content>
             </Card>
