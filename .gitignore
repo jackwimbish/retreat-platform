@@ -60,3 +60,4 @@ docker-compose.override.yml
 
 # Screenshots for development
 _docs/screenshots
+_docs/documentation
