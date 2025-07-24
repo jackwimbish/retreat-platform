@@ -4,9 +4,15 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Container, Segment, Form, Button, Header, Grid, Label, Icon } from 'semantic-ui-react';
+import { Container, Segment, Form, Button, Header, Grid, Label, Icon, Confirm } from 'semantic-ui-react';
 import { TextWidget, SelectWidget, TextareaWidget } from '@plone/volto/components';
 import { FormattedDate } from '@plone/volto/components';
+import { withRouter } from 'react-router-dom';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { getUser } from '@plone/volto/actions';
+import { getBaseUrl, userHasRoles } from '@plone/volto/helpers';
+import jwtDecode from 'jwt-decode';
 import './IssueEditForm.css';
 
 class IssueEditForm extends Component {
@@ -18,6 +24,10 @@ class IssueEditForm extends Component {
     pathname: PropTypes.string.isRequired,
     loading: PropTypes.bool,
     intl: PropTypes.object.isRequired,
+    getUser: PropTypes.func.isRequired,
+    history: PropTypes.object.isRequired,
+    user: PropTypes.object,
+    token: PropTypes.string,
   };
 
   constructor(props) {
@@ -25,7 +35,17 @@ class IssueEditForm extends Component {
     this.state = {
       formData: { ...props.formData },
       errors: {},
+      showDeleteConfirm: false,
+      deleteLoading: false,
     };
+  }
+
+  componentDidMount() {
+    // Fetch user data if we have a token
+    if (this.props.token) {
+      const userId = jwtDecode(this.props.token).sub;
+      this.props.getUser(userId);
+    }
   }
 
   handleFieldChange = (id, value) => {
@@ -99,6 +119,57 @@ class IssueEditForm extends Component {
   onSubmit = () => {
     if (this.validateForm()) {
       this.props.onSubmit(this.state.formData);
+    }
+  };
+
+  handleDeleteClick = () => {
+    this.setState({ showDeleteConfirm: true });
+  };
+
+  handleDeleteCancel = () => {
+    this.setState({ showDeleteConfirm: false });
+  };
+
+  handleDeleteConfirm = async () => {
+    this.setState({ deleteLoading: true });
+    
+    // Get the URL for deletion
+    const deleteUrl = getBaseUrl(this.props.pathname);
+    const headers = {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${this.props.token}`,
+    };
+    
+    try {
+      // First, try to unlock the content (it's locked because we're in edit mode)
+      // We don't await or check the response - if it fails, that's OK
+      fetch(`/++api++${deleteUrl}/@lock`, {
+        method: 'DELETE',
+        headers,
+      }).catch(() => {
+        // Ignore unlock errors - the content might not be locked
+      });
+      
+      // Now try to delete
+      const deleteResponse = await fetch(`/++api++${deleteUrl}`, {
+        method: 'DELETE',
+        headers,
+      });
+      
+      if (deleteResponse.ok || deleteResponse.status === 204) {
+        // Successfully deleted, redirect to issues folder
+        this.props.history.push('/issues');
+      } else if (deleteResponse.status === 423) {
+        // Still locked, user should cancel edit first
+        alert('Please cancel editing before deleting the issue.');
+        this.setState({ deleteLoading: false, showDeleteConfirm: false });
+      } else {
+        throw new Error(`Delete failed with status: ${deleteResponse.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting issue:', error);
+      this.setState({ deleteLoading: false, showDeleteConfirm: false });
+      alert('Error deleting issue. Please try again.');
     }
   };
 
@@ -336,12 +407,46 @@ class IssueEditForm extends Component {
                 <Icon name="cancel" />
                 Cancel
               </Button>
+              
+              {/* Delete button - only show for users with Manager role */}
+              {userHasRoles(this.props.user, ['Manager', 'Site Administrator']) && (
+                <Button
+                  color="red"
+                  size="large"
+                  onClick={this.handleDeleteClick}
+                  disabled={loading || this.state.deleteLoading}
+                  floated="right"
+                >
+                  <Icon name="trash" />
+                  Delete Issue
+                </Button>
+              )}
             </Segment>
           </Form>
         </Segment>
+        
+        {/* Delete Confirmation Dialog */}
+        <Confirm
+          open={this.state.showDeleteConfirm}
+          onCancel={this.handleDeleteCancel}
+          onConfirm={this.handleDeleteConfirm}
+          header="Delete Issue"
+          content={`Are you sure you want to delete "${formData.title}"? This action cannot be undone.`}
+          confirmButton="Delete"
+          size="small"
+        />
       </Container>
     );
   }
 }
 
-export default IssueEditForm;
+export default compose(
+  withRouter,
+  connect(
+    (state) => ({
+      user: state.users.user,
+      token: state.userSession.token,
+    }),
+    { getUser }
+  )
+)(IssueEditForm);

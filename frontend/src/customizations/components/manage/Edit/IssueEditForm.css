@@ -96,6 +96,15 @@
   margin: 0 0.5rem;
 }
 
+/* Delete button styling */
+.form-actions .ui.button.red {
+  margin-left: 2rem;
+}
+
+.form-actions .ui.button.red:hover {
+  background-color: #d01919 !important;
+}
+
 /* Responsive Design */
 @media only screen and (max-width: 767px) {
   .issue-edit-form {
