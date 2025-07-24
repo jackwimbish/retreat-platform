@@ -9,6 +9,7 @@ import {
   Navigation,
   SearchWidget,
 } from '@plone/volto/components';
+import QuickIssueModal from '../../../../components/QuickIssueModal';
 
 const Header = ({ pathname }) => {
   const token = useSelector((state) => state.userSession.token, shallowEqual);
@@ -28,6 +29,11 @@ const Header = ({ pathname }) => {
             {!token && (
               <div className="tools">
                 <Anontools />
+              </div>
+            )}
+            {token && (
+              <div className="quick-issue-button">
+                <QuickIssueModal headerMode />
               </div>
             )}
             <div className="search">

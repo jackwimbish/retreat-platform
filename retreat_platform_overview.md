@@ -35,7 +35,7 @@ We will build the following six new features on top of the Plone 6.1 foundation:
 
 4. **Real-Time Notifications:** A live notification system (using WebSockets) to alert admins of new issue reports and to inform participants about booking confirmations or status changes.
 
-5. **Custom Analytics Dashboard:** A private dashboard for admins to view key metrics, such as the number of open vs. resolved issues, most-used resources, and participant engagement levels.
+5. **SSO Integration:** Sign in with your Google account or other common SSO providers.
 
 6. **Third-Party Calendar Integration:** The ability to sync resource bookings with an external service like Google Calendar, allowing admins to view schedules on their preferred platform.
 
