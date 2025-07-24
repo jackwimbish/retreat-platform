@@ -1,0 +1,187 @@
+/* Issue Edit Form Styles */
+
+.issue-edit-form {
+  max-width: 1200px;
+  margin: 2rem auto;
+}
+
+.issue-edit-form > .ui.basic.segment {
+  padding: 0;
+}
+
+/* Header */
+.issue-edit-form h1.header {
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+/* Quick Actions Bar */
+.quick-actions-bar {
+  background-color: #f8f9fa !important;
+  border: 1px solid #dee2e6 !important;
+  margin-bottom: 2rem !important;
+  padding: 1.5rem !important;
+}
+
+.quick-actions-bar .ui.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quick-actions-bar .ui.button {
+  margin: 0 !important;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 2rem !important;
+  padding: 2rem !important;
+  background: #fff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.form-section h3.header {
+  color: #444;
+  margin-bottom: 1.5rem !important;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.form-section h3.header .icon {
+  opacity: 0.8;
+}
+
+/* Status and Priority Indicators */
+.status-indicator,
+.priority-indicator {
+  margin-left: 0.5rem !important;
+  vertical-align: middle;
+}
+
+/* Field Spacing */
+.form-section .field {
+  margin-bottom: 1.5rem !important;
+}
+
+.form-section .field:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Info Section */
+.info-section {
+  background-color: #f8f9fa !important;
+}
+
+.info-field {
+  padding: 0.5rem 0;
+  color: #666;
+}
+
+.info-field strong {
+  color: #333;
+  margin-right: 0.5rem;
+}
+
+/* Form Actions */
+.form-actions {
+  margin-top: 2rem !important;
+  padding-top: 2rem !important;
+  border-top: 2px solid #f0f0f0;
+}
+
+.form-actions .ui.button {
+  margin: 0 0.5rem;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 767px) {
+  .issue-edit-form {
+    margin: 1rem;
+  }
+  
+  .form-section {
+    padding: 1.5rem !important;
+  }
+  
+  .quick-actions-bar .ui.buttons {
+    flex-direction: column;
+  }
+  
+  .quick-actions-bar .ui.button {
+    width: 100%;
+  }
+  
+  .form-actions .ui.button {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0 !important;
+  }
+}
+
+/* Field Focus States */
+.form-section .field:focus-within {
+  position: relative;
+}
+
+.form-section .field:focus-within::after {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  right: -1rem;
+  top: -0.5rem;
+  bottom: -0.5rem;
+  border: 2px solid #4183c4;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+/* Error States */
+.form-section .field.error input,
+.form-section .field.error textarea,
+.form-section .field.error .ui.dropdown {
+  border-color: #e0b4b4 !important;
+  background: #fff6f6 !important;
+}
+
+/* Loading State */
+.issue-edit-form .ui.form.loading::after {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Textarea Enhancement */
+.form-section textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Resolution Section Highlight */
+#field-resolution_notes {
+  transition: all 0.3s ease;
+}
+
+#field-resolution_notes:target {
+  box-shadow: 0 0 0 3px rgba(33, 133, 208, 0.3) !important;
+}
+
+/* Custom Select Widget Style */
+.form-section .ui.selection.dropdown {
+  min-height: 38px;
+}
+
+/* Print Styles */
+@media print {
+  .quick-actions-bar,
+  .form-actions {
+    display: none !important;
+  }
+  
+  .form-section {
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
