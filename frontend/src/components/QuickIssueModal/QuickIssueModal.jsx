@@ -126,6 +126,7 @@ const QuickIssueModal = ({ headerMode = false }) => {
 
       if (response.ok) {
         const data = await response.json();
+        
         toast.success('Issue created successfully!');
         setOpen(false);
         // Redirect to the new issue

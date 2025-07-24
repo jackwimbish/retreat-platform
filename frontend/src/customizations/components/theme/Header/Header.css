@@ -1,0 +1,51 @@
+/* Header Customizations */
+
+/* User info display */
+.header-wrapper .user-info {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(33, 133, 208, 0.1);
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.header-wrapper .user-info .username {
+  color: #2185d0;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Adjust logo-nav-wrapper to accommodate username */
+.header-wrapper .logo-nav-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+/* Ensure the navigation doesn't get squeezed */
+.header-wrapper .navigation {
+  flex: 1;
+  margin-left: 1rem;
+}
+
+/* Mobile responsive adjustments */
+@media only screen and (max-width: 991px) {
+  .header-wrapper .user-info {
+    display: none; /* Hide on mobile to save space */
+  }
+}
+
+/* Optional: Add an icon before username */
+.header-wrapper .user-info::before {
+  content: "👤";
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Hover effect */
+.header-wrapper .user-info:hover {
+  background-color: rgba(33, 133, 208, 0.15);
+  cursor: default;
+}
