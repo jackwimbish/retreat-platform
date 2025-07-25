@@ -155,7 +155,7 @@ const HomepageView = (props) => {
           <Icon name="lightning" />
           Quick Actions
         </Header>
-        <Grid stackable columns={2}>
+        <Grid stackable columns={3}>
           <Grid.Column>
             <Card fluid as={Link} to="/issues" className="action-card">
               <Card.Content textAlign="center">
@@ -163,6 +163,17 @@ const HomepageView = (props) => {
                 <Card.Header>Issues Dashboard</Card.Header>
                 <Card.Description>
                   View and manage all maintenance issues
+                </Card.Description>
+              </Card.Content>
+            </Card>
+          </Grid.Column>
+          <Grid.Column>
+            <Card fluid as={Link} to="/directory" className="action-card">
+              <Card.Content textAlign="center">
+                <Icon name="users" size="huge" color="green" />
+                <Card.Header>Camp Directory</Card.Header>
+                <Card.Description>
+                  View all participants, staff, and directors
                 </Card.Description>
               </Card.Content>
             </Card>

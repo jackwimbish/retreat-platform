@@ -138,7 +138,7 @@ else:
     # Set CORS environment variables
     env = os.environ.copy()
     env.update({
-        'CORS_ALLOW_ORIGIN': 'http://localhost:3000',
+        'CORS_ALLOW_ORIGIN': '*',
         'CORS_ALLOW_METHODS': 'DELETE,GET,OPTIONS,PATCH,POST,PUT',
         'CORS_ALLOW_CREDENTIALS': 'true',
         'CORS_ALLOW_HEADERS': 'Accept,Authorization,Content-Type,X-CSRF-TOKEN',

@@ -50,7 +50,10 @@ import {
   PersonalInformation,
 } from '@plone/volto/components';
 
-// Custom components removed - using standard pages
+// Custom components
+import DirectoryGenerator from './components/DirectoryGenerator';
+import DirectoryDebug from './components/DirectoryGenerator/DirectoryDebug';
+import DebugUsers from './components/DirectoryGenerator/DebugUsers';
 
 // Deliberatelly use of absolute path of these components, since we do not want them
 // in the components/index.js file.
@@ -313,6 +316,21 @@ export const defaultRoutes = [
   {
     path: '/personal-information',
     component: PersonalInformation,
+    exact: true,
+  },
+  {
+    path: '/directory-generator',
+    component: DirectoryGenerator,
+    exact: true,
+  },
+  {
+    path: '/directory-debug',
+    component: DirectoryDebug,
+    exact: true,
+  },
+  {
+    path: '/debug-users',
+    component: DebugUsers,
     exact: true,
   },
   {
