@@ -72,16 +72,6 @@ const IssueView = (props) => {
             <Icon name="edit" />
             Edit Issue
           </Button>
-          {statusValue !== 'resolved' && (
-            <Button positive>
-              <Icon name="check" />
-              Mark as Resolved
-            </Button>
-          )}
-          <Button basic>
-            <Icon name="print" />
-            Print
-          </Button>
         </div>
       </div>
 
@@ -203,88 +193,7 @@ const IssueView = (props) => {
               </Message>
             )}
 
-            {/* Quick Actions Card */}
-            <Card fluid>
-              <Card.Content>
-                <Card.Header>
-                  <Icon name="lightning" />
-                  Quick Actions
-                </Card.Header>
-                <Card.Description>
-                  <Button.Group vertical fluid>
-                    <Button basic>
-                      <Icon name="user plus" />
-                      Assign to Staff
-                    </Button>
-                    <Button basic>
-                      <Icon name="copy" />
-                      Duplicate Issue
-                    </Button>
-                    <Button basic>
-                      <Icon name="archive" />
-                      Archive Issue
-                    </Button>
-                    <Button basic color="red">
-                      <Icon name="trash" />
-                      Delete Issue
-                    </Button>
-                  </Button.Group>
-                </Card.Description>
-              </Card.Content>
-            </Card>
 
-            {/* Related Information */}
-            <Card fluid>
-              <Card.Content>
-                <Card.Header>
-                  <Icon name="linkify" />
-                  Related Information
-                </Card.Header>
-                <Card.Description>
-                  <List>
-                    <List.Item>
-                      <List.Icon name="folder" />
-                      <List.Content>
-                        <Link to={flattenToAppURL(parentPath)}>
-                          Back to Issues List
-                        </Link>
-                      </List.Content>
-                    </List.Item>
-                    <List.Item>
-                      <List.Icon name="filter" />
-                      <List.Content>
-                        <Link to={`${flattenToAppURL(parentPath)}?location=${encodeURIComponent(content.location || '')}`}>
-                          Issues in {content.location || 'this location'}
-                        </Link>
-                      </List.Content>
-                    </List.Item>
-                  </List>
-                </Card.Description>
-              </Card.Content>
-            </Card>
-
-            {/* Metadata Card */}
-            <Card fluid>
-              <Card.Content>
-                <Card.Header>
-                  <Icon name="database" />
-                  Metadata
-                </Card.Header>
-                <Card.Description>
-                  <List size="small">
-                    <List.Item>
-                      <strong>ID:</strong> {content['@id'].split('/').pop()}
-                    </List.Item>
-                    <List.Item>
-                      <strong>Type:</strong> {content['@type']}
-                    </List.Item>
-                    <List.Item>
-                      <strong>State:</strong> {content.review_state}
-                    </List.Item>
-                  </List>
-                </Card.Description>
-              </Card.Content>
-            </Card>
           </Grid.Column>
         </Grid.Row>
       </Grid>

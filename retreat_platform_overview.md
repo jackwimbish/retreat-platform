@@ -33,11 +33,11 @@ We will build the following six new features on top of the Plone 6.1 foundation:
 
 3. **Resource Booking System:** A calendar-based system for reserving shared facility resources, such as meeting rooms, lab equipment, or vehicles, preventing scheduling conflicts.
 
-4. **Real-Time Notifications:** A live notification system (using WebSockets) to alert admins of new issue reports and to inform participants about booking confirmations or status changes.
+4. **SSO Integration:** Sign in with your Google account or other common SSO providers.
 
-5. **SSO Integration:** Sign in with your Google account or other common SSO providers.
+5. **Event Calendar:** A calendar for group events. Admins should be able to post to the calendar, participants should be able to view.
 
-6. **Third-Party Calendar Integration:** The ability to sync resource bookings with an external service like Google Calendar, allowing admins to view schedules on their preferred platform.
+6. **Notifications:** A notification system to alert admins and participants of new issue reports booking confirmations, and calendar events.
 
 ## 6. Measures of Success
 
