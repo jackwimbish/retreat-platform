@@ -26,6 +26,7 @@ import '../../../../theme/HomepageView.css';
 const HomepageView = (props) => {
   const { content } = props;
   const currentUser = useSelector((state) => state.users?.user);
+  const token = useSelector((state) => state.userSession?.token);
   const [recentIssues, setRecentIssues] = useState([]);
   const [issueStats, setIssueStats] = useState({
     total: 0,
@@ -41,10 +42,17 @@ const HomepageView = (props) => {
     const fetchIssuesData = async () => {
       try {
         // Fetch recent issues
+        const headers = {
+          'Accept': 'application/json',
+        };
+        
+        // Add auth token if available
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         const recentResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=created&metadata_fields=modified&metadata_fields=status&metadata_fields=priority&metadata_fields=location&sort_on=created&sort_order=descending&b_size=5', {
-          headers: {
-            'Accept': 'application/json',
-          },
+          headers,
           credentials: 'same-origin',
         });
         
@@ -55,9 +63,7 @@ const HomepageView = (props) => {
 
         // Fetch all issues for statistics (lightweight, no full objects)
         const statsResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=status&metadata_fields=priority&b_size=1000', {
-          headers: {
-            'Accept': 'application/json',
-          },
+          headers,
           credentials: 'same-origin',
         });
         
@@ -191,6 +197,40 @@ const HomepageView = (props) => {
           </Grid.Column>
         </Grid>
       </Segment>
+
+      {/* Admin Tools Section - Only visible to managers */}
+      {(currentUser?.roles?.includes('Manager') || currentUser?.id === 'admin') && (
+        <Segment className="admin-tools-section">
+          <Header as="h2">
+            <Icon name="cog" />
+            Admin Tools
+          </Header>
+          <Grid stackable columns={2}>
+            <Grid.Column>
+              <Card fluid as={Link} to="/manage-users" className="action-card">
+                <Card.Content textAlign="center">
+                  <Icon name="user cog" size="huge" color="purple" />
+                  <Card.Header>Manage Users</Card.Header>
+                  <Card.Description>
+                    Assign camp roles to users
+                  </Card.Description>
+                </Card.Content>
+              </Card>
+            </Grid.Column>
+            <Grid.Column>
+              <Card fluid as={Link} to="/directory-generator" className="action-card">
+                <Card.Content textAlign="center">
+                  <Icon name="sync" size="huge" color="orange" />
+                  <Card.Header>Update Directory</Card.Header>
+                  <Card.Description>
+                    Regenerate the camp directory
+                  </Card.Description>
+                </Card.Content>
+              </Card>
+            </Grid.Column>
+          </Grid>
+        </Segment>
+      )}
 
       <Grid stackable>
         <Grid.Row>

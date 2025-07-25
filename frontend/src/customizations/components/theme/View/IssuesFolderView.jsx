@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { 
   Container, 
   Segment, 
@@ -24,6 +25,7 @@ import '../../../../theme/IssuesFolderView.css';
 
 const IssuesFolderView = (props) => {
   const { content } = props;
+  const token = useSelector((state) => state.userSession?.token);
   
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -76,10 +78,17 @@ const IssuesFolderView = (props) => {
       setLoading(true);
       try {
         // Search for all issues in the system
+        const headers = {
+          'Accept': 'application/json',
+        };
+        
+        // Add auth token if available
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         const searchResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=created&metadata_fields=modified&metadata_fields=location&metadata_fields=status&metadata_fields=priority&b_size=1000&fullobjects=true', {
-          headers: {
-            'Accept': 'application/json',
-          },
+          headers,
           credentials: 'same-origin',
         });
         

@@ -54,6 +54,7 @@ import {
 import DirectoryGenerator from './components/DirectoryGenerator';
 import DirectoryDebug from './components/DirectoryGenerator/DirectoryDebug';
 import DebugUsers from './components/DirectoryGenerator/DebugUsers';
+import UserRoleManager from './components/UserRoleManager';
 
 // Deliberatelly use of absolute path of these components, since we do not want them
 // in the components/index.js file.
@@ -321,6 +322,11 @@ export const defaultRoutes = [
   {
     path: '/directory-generator',
     component: DirectoryGenerator,
+    exact: true,
+  },
+  {
+    path: '/manage-users',
+    component: UserRoleManager,
     exact: true,
   },
   {
