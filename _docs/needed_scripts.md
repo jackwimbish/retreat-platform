@@ -9,3 +9,8 @@ protect_homepage_simple.py
 setup_default_content.py
 
 switch_to_one_state_workflow.py
+
+
+yarn stuff:
+npm install -g yo @plone/volto-generator
+yarn add @plone-collective/volto-authomatic

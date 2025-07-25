@@ -32,6 +32,9 @@
       "package": "@plone/volto-slate"
     }
   },
+  "addons": [
+    "@plone-collective/volto-authomatic"
+  ],
   "types": "types/index.d.ts",
   "scripts": {
     "postinstall": "make patches",
@@ -251,6 +254,7 @@
     "@loadable/component": "5.14.1",
     "@loadable/server": "5.14.0",
     "@loadable/webpack-plugin": "5.15.2",
+    "@plone-collective/volto-authomatic": "2.0.1",
     "@plone/scripts": "^3.3.2",
     "@testing-library/cypress": "9.0.0",
     "@testing-library/jest-dom": "5.16.4",
