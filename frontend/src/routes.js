@@ -50,6 +50,8 @@ import {
   PersonalInformation,
 } from '@plone/volto/components';
 
+// Custom components removed - using standard pages
+
 // Deliberatelly use of absolute path of these components, since we do not want them
 // in the components/index.js file.
 import App from '@plone/volto/components/theme/App/App';

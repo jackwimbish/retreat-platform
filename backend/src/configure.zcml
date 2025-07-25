@@ -4,12 +4,6 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="plone">
 
-  <!-- Directory View -->
-  <browser:page
-      name="directory"
-      for="*"
-      class=".directory_view.DirectoryView"
-      permission="zope2.View"
-      />
+  <!-- Custom configurations will go here -->
 
 </configure>
