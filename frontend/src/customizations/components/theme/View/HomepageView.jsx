@@ -253,29 +253,8 @@ const HomepageView = (props) => {
             </Segment>
           </Grid.Column>
 
-          {/* Quick Actions Sidebar */}
+          {/* Coming Soon Sidebar */}
           <Grid.Column width={6}>
-            <Segment className="quick-actions">
-              <Header as="h3">
-                <Icon name="tasks" />
-                Quick Tasks
-              </Header>
-              <Button.Group vertical fluid>
-                <Button basic as={Link} to="/issues?status=new">
-                  <Icon name="exclamation circle" color="red" />
-                  View New Issues ({issueStats.new})
-                </Button>
-                <Button basic as={Link} to="/issues?priority=critical">
-                  <Icon name="warning sign" color="red" />
-                  Critical Issues ({issueStats.critical})
-                </Button>
-                <Button basic as={Link} to="/issues?priority=high">
-                  <Icon name="exclamation triangle" color="orange" />
-                  High Priority ({issueStats.high})
-                </Button>
-              </Button.Group>
-            </Segment>
-
             <Segment className="upcoming-features">
               <Header as="h3">
                 <Icon name="rocket" />
