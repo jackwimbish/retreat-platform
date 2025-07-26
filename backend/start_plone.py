@@ -9,6 +9,7 @@ import sys
 import subprocess
 from pathlib import Path
 import time
+from dotenv import load_dotenv
 
 # Configuration
 INSTANCE_DIR = Path(__file__).parent / "instance"
@@ -46,6 +47,9 @@ def run_command(cmd, env=None):
 
 def main():
     """Main entry point"""
+    # Load environment variables from .env file
+    load_dotenv(Path(__file__).parent / '.env')
+    
     print("Starting Plone with automatic setup...")
     print("-" * 60)
     

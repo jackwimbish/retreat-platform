@@ -1,0 +1,5 @@
+# Email notifications
+resend
+python-dotenv
+
+# Plone requirements (add your existing packages here)

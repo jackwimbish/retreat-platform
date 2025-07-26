@@ -11,5 +11,12 @@
       class=".public_portrait.PublicPortraitView"
       permission="zope.Public"
       />
+      
+  <!-- Event subscriber for new issue notifications -->
+  <subscriber
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      handler=".notifications.notify_new_issue"
+      />
 
 </configure>
