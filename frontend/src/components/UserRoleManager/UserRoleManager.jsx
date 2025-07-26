@@ -44,6 +44,7 @@ const UserRoleManager = () => {
     { key: 'member', text: 'Participant', value: 'Member', color: 'blue' },
     { key: 'editor', text: 'Staff', value: 'Editor', color: 'green' },
     { key: 'manager', text: 'Director', value: 'Manager', color: 'purple' },
+    { key: 'none', text: 'No Camp Role', value: 'none', color: 'red' },
   ];
 
   useEffect(() => {
@@ -76,11 +77,13 @@ const UserRoleManager = () => {
       // For each user, determine their camp role
       const usersWithRoles = filteredUsers.map(user => {
         // Determine the highest role level
-        let campRole = 'Member'; // Default to Member
+        let campRole = 'none'; // Default to none if no camp role
         if (user.roles?.includes('Manager')) {
           campRole = 'Manager';
         } else if (user.roles?.includes('Editor')) {
           campRole = 'Editor';
+        } else if (user.roles?.includes('Member')) {
+          campRole = 'Member';
         }
         
         return {
@@ -127,8 +130,11 @@ const UserRoleManager = () => {
         }
       });
       
-      // Add the selected camp role
-      rolesDict[newRole] = true;
+      // Explicitly set all camp roles - false to remove, true to add
+      // This ensures the user has exactly one camp role at a time
+      rolesDict['Member'] = (newRole === 'Member');
+      rolesDict['Editor'] = (newRole === 'Editor');
+      rolesDict['Manager'] = (newRole === 'Manager');
       
       // Make the API call with roles as a dict
       const updateResponse = await fetch(`/++api++/@users/${userId}`, {
@@ -301,6 +307,7 @@ const UserRoleManager = () => {
             <div style={{ marginBottom: '0.5em' }}><Label color="blue">Participant (Member)</Label> Can view and create issues</div>
             <div style={{ marginBottom: '0.5em' }}><Label color="green">Staff (Editor)</Label> Can view, create, and edit all issues</div>
             <div style={{ marginBottom: '0.5em' }}><Label color="purple">Director (Manager)</Label> Full administrative access</div>
+            <div style={{ marginBottom: '0.5em' }}><Label color="red">No Camp Role</Label> User can only view public content (limited access)</div>
           </Segment>
         </Segment>
       )}
