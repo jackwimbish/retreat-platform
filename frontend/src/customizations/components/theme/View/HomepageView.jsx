@@ -209,7 +209,7 @@ const HomepageView = (props) => {
             <Grid.Column>
               <Card fluid as={Link} to="/manage-users" className="action-card">
                 <Card.Content textAlign="center">
-                  <Icon name="user cog" size="huge" color="purple" />
+                  <Icon name="users" size="huge" color="purple" />
                   <Card.Header>Manage Users</Card.Header>
                   <Card.Description>
                     Assign camp roles to users

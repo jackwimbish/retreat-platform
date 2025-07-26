@@ -80,7 +80,7 @@ const DirectoryGenerator = () => {
         fullname: user.fullname || user.id,
         email: user.email || '',
         roles: user.roles || [],
-        portrait: user.portrait ? user.portrait.replace('http://localhost:3000/', '/++api++/') : null,
+        portrait: user.portrait ? `http://localhost:8080/Plone/@@public-portrait?username=${user.id}` : null,
         initials: getInitials(user.fullname || user.id),
       };
 

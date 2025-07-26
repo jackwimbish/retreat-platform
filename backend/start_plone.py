@@ -28,6 +28,9 @@ def run_command(cmd, env=None):
     env['PATH'] = f"{VENV_DIR}/bin:{env['PATH']}"
     env['VIRTUAL_ENV'] = str(VENV_DIR)
     
+    # Add src directory to Python path for custom code
+    env['PYTHONPATH'] = f"{BACKEND_DIR}/src:{env.get('PYTHONPATH', '')}"
+    
     print(f"Running: {cmd}")
     result = subprocess.run(cmd, shell=True, env=env, capture_output=True, text=True)
     
@@ -67,6 +70,13 @@ def main():
     data_fs = INSTANCE_DIR / "var" / "filestorage" / "Data.fs"
     if not data_fs.exists() or data_fs.stat().st_size < 1000:  # New database
         print("\nInitializing new Plone site...")
+        
+        # Temporarily disable retreat package for initialization
+        retreat_config = INSTANCE_DIR / "etc" / "package-includes" / "retreat-configure.zcml"
+        retreat_disabled = retreat_config.with_suffix('.zcml.disabled')
+        if retreat_config.exists():
+            print("Temporarily disabling retreat package for initialization...")
+            retreat_config.rename(retreat_disabled)
         
         # Create initialization script content
         init_script = '''
@@ -134,6 +144,18 @@ else:
         # Wait a moment for the site to be fully initialized
         print("\nWaiting for site initialization to complete...")
         time.sleep(2)
+        
+        # Re-enable retreat package after initialization
+        if retreat_disabled.exists():
+            print("\nRe-enabling custom retreat package...")
+            retreat_disabled.rename(retreat_config)
+    
+    # Ensure retreat package configuration exists
+    retreat_config = INSTANCE_DIR / "etc" / "package-includes" / "retreat-configure.zcml"
+    if not retreat_config.exists():
+        print("\nCreating retreat package configuration...")
+        retreat_config.parent.mkdir(parents=True, exist_ok=True)
+        retreat_config.write_text('<include package="retreat" />')
     
     # Set CORS environment variables
     env = os.environ.copy()
@@ -145,6 +167,9 @@ else:
         'CORS_EXPOSE_HEADERS': 'Content-Length,X-My-Header',
         'CORS_MAX_AGE': '3600'
     })
+    
+    # Add src directory to Python path for custom code
+    env['PYTHONPATH'] = f"{BACKEND_DIR}/src:{env.get('PYTHONPATH', '')}"
     
     print("\n" + "=" * 60)
     print("Starting Plone server...")
