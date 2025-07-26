@@ -1,6 +1,20 @@
-# Retreat Experience Platform
+# Camp Coordinator - Retreat Experience Platform
 
 A specialized platform for managing long-duration bootcamps, retreats, and residential events. Built on Plone 6.1 with a custom Volto frontend.
+
+## 🚀 Quick Start with Docker
+
+```bash
+# Build and start the application
+make build
+make start
+make init  # First time only - sets up site and content
+
+# Access the application at http://localhost:3000
+# Default login: admin/admin
+```
+
+See [DOCKER.md](DOCKER.md) for detailed Docker setup instructions.
 
 ## 🎯 Project Overview
 

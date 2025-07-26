@@ -1,19 +1,10 @@
 #!/usr/bin/env python
 """
 Setup custom content types for the Retreat Platform
-Run this after the site is created: ./setup_content_types.py
+Run this after the site is created via zconsole
 """
 
-import os
-import sys
-from pathlib import Path
-
-# Add instance directory to Python path
-instance_dir = Path(__file__).parent / "instance"
-sys.path.insert(0, str(instance_dir))
-
-# Script to run inside Plone
-setup_script = '''
+# This script is meant to be run directly via zconsole
 import transaction
 from plone.dexterity.fti import DexterityFTI
 from Products.CMFCore.utils import getToolByName
@@ -38,9 +29,6 @@ if 'Plone' in app.objectIds():
     from zope.site.hooks import setSite
     setSite(plone)
     
-    # Also set up request
-    plone.REQUEST['PARENTS'] = [plone]
-    
     portal_types = getToolByName(plone, 'portal_types')
     
     print("Setting up custom content types...")
@@ -60,13 +48,18 @@ if 'Plone' in app.objectIds():
         fti.allow_discussion = False
         fti.default_view = 'view'
         fti.view_methods = ('view',)
-        fti.add_permission = 'cmf.AddPortalContent'
-        fti.klass = 'plone.dexterity.content.Container'
+        
+        # Enable behaviors
         fti.behaviors = (
-            'plone.dublincore',
+            'plone.dublin_core',
             'plone.namefromtitle',
-            'plone.shortname',
+            'plone.allowdiscussion',
             'plone.excludefromnavigation',
+            'plone.shortname',
+            'plone.ownership',
+            'plone.publication',
+            'plone.categorization',
+            'plone.basic',
             'plone.relateditems',
             'plone.versioning',
             'plone.locking',
@@ -100,11 +93,11 @@ if 'Plone' in app.objectIds():
         <element>low</element>
         <element>normal</element>
         <element>high</element>
-        <element>critical</element>
+        <element>urgent</element>
       </values>
     </field>
     <field name="location" type="zope.schema.TextLine">
-      <description>Where is the issue located?</description>
+      <description>Where is this issue located?</description>
       <required>True</required>
       <title>Location</title>
     </field>
@@ -123,9 +116,16 @@ if 'Plone' in app.objectIds():
 """
         
         portal_types._setObject('issue', fti)
+        # Ensure icon_expr is properly initialized
+        issue_fti = portal_types['issue']
+        issue_fti._updateProperty('icon_expr', 'string:file-earmark-text')
         print("✓ Issue content type created")
     else:
         print("! Issue content type already exists")
+        # Update icon_expr for existing type
+        issue_fti = portal_types['issue']
+        issue_fti._updateProperty('icon_expr', 'string:file-earmark-text')
+        print("  ✓ Updated icon expression")
     
     # Create Participant content type
     if 'participant' not in portal_types:
@@ -142,13 +142,18 @@ if 'Plone' in app.objectIds():
         fti.allow_discussion = False
         fti.default_view = 'view'
         fti.view_methods = ('view',)
-        fti.add_permission = 'cmf.AddPortalContent'
-        fti.klass = 'plone.dexterity.content.Container'
+        
+        # Enable behaviors
         fti.behaviors = (
-            'plone.dublincore',
+            'plone.dublin_core',
             'plone.namefromtitle',
-            'plone.shortname',
+            'plone.allowdiscussion',
             'plone.excludefromnavigation',
+            'plone.shortname',
+            'plone.ownership',
+            'plone.publication',
+            'plone.categorization',
+            'plone.basic',
             'plone.relateditems',
             'plone.versioning',
             'plone.locking',
@@ -165,42 +170,37 @@ if 'Plone' in app.objectIds():
        xmlns="http://namespaces.plone.org/supermodel/schema">
   <schema>
     <field name="email" type="zope.schema.TextLine">
-      <description>Participant's email address</description>
+      <description>Contact email address</description>
       <required>True</required>
       <title>Email</title>
     </field>
     <field name="phone" type="zope.schema.TextLine">
-      <description>Participant's phone number</description>
+      <description>Contact phone number</description>
       <required>False</required>
       <title>Phone</title>
     </field>
-    <field name="emergency_contact_name" type="zope.schema.TextLine">
-      <description>Name of emergency contact</description>
+    <field name="emergency_contact" type="zope.schema.Text">
+      <description>Emergency contact information</description>
       <required>True</required>
-      <title>Emergency Contact Name</title>
-    </field>
-    <field name="emergency_contact_phone" type="zope.schema.TextLine">
-      <description>Phone number of emergency contact</description>
-      <required>True</required>
-      <title>Emergency Contact Phone</title>
+      <title>Emergency Contact</title>
     </field>
     <field name="dietary_restrictions" type="zope.schema.Text">
-      <description>Any dietary restrictions or preferences</description>
+      <description>Any dietary restrictions or allergies</description>
       <required>False</required>
       <title>Dietary Restrictions</title>
     </field>
-    <field name="medical_notes" type="zope.schema.Text">
-      <description>Any medical conditions or medications</description>
+    <field name="special_needs" type="zope.schema.Text">
+      <description>Any special accommodations needed</description>
       <required>False</required>
-      <title>Medical Notes</title>
+      <title>Special Needs</title>
     </field>
     <field name="arrival_date" type="zope.schema.Date">
-      <description>Date of arrival</description>
+      <description>Expected arrival date</description>
       <required>True</required>
       <title>Arrival Date</title>
     </field>
     <field name="departure_date" type="zope.schema.Date">
-      <description>Date of departure</description>
+      <description>Expected departure date</description>
       <required>True</required>
       <title>Departure Date</title>
     </field>
@@ -209,9 +209,16 @@ if 'Plone' in app.objectIds():
 """
         
         portal_types._setObject('participant', fti)
+        # Ensure icon_expr is properly initialized
+        participant_fti = portal_types['participant']
+        participant_fti._updateProperty('icon_expr', 'string:user')
         print("✓ Participant content type created")
     else:
         print("! Participant content type already exists")
+        # Update icon_expr for existing type
+        participant_fti = portal_types['participant']
+        participant_fti._updateProperty('icon_expr', 'string:user')
+        print("  ✓ Updated icon expression")
     
     # Update permissions if needed
     plone.reindexObject()
@@ -219,50 +226,10 @@ if 'Plone' in app.objectIds():
     # Commit transaction
     transaction.commit()
     
-    print("\\n✓ Content types setup complete!")
-    print("\\nYou can now create:")
+    print("\n✓ Content types setup complete!")
+    print("\nYou can now create:")
     print("- Issues: for tracking maintenance and facility problems")
     print("- Participants: for managing retreat attendees")
-    print("\\nAccess them through the Volto UI at http://localhost:3000")
+    print("\nAccess them through the Volto UI at http://localhost:3000")
 else:
     print("Error: Plone site not found!")
-'''
-
-def main():
-    """Main entry point"""
-    print("Setting up Retreat Platform content types...")
-    print("-" * 60)
-    
-    # Write the script
-    script_file = instance_dir / "setup_types_temp.py"
-    script_file.write_text(setup_script)
-    
-    # Run the script
-    import subprocess
-    
-    # Activate virtualenv in the environment
-    env = os.environ.copy()
-    venv_dir = Path(__file__).parent / "venv"
-    env['PATH'] = f"{venv_dir}/bin:{env['PATH']}"
-    env['VIRTUAL_ENV'] = str(venv_dir)
-    
-    try:
-        result = subprocess.run(
-            ["zconsole", "run", "etc/zope.conf", "setup_types_temp.py"],
-            cwd=instance_dir,
-            env=env,
-            capture_output=True,
-            text=True
-        )
-        
-        if result.stdout:
-            print(result.stdout)
-        if result.stderr:
-            print(result.stderr)
-            
-    finally:
-        # Clean up
-        script_file.unlink()
-
-if __name__ == "__main__":
-    main()

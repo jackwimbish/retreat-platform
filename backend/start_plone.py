@@ -188,6 +188,18 @@ else:
     
     # Start server
     os.chdir(INSTANCE_DIR)
+    
+    # Check if we need to update zope.ini for Docker
+    zope_ini_path = INSTANCE_DIR / "etc" / "zope.ini"
+    if zope_ini_path.exists():
+        content = zope_ini_path.read_text()
+        # If running in Docker, ensure we bind to all interfaces
+        if os.environ.get('DOCKER_CONTAINER'):
+            if 'host = 127.0.0.1' in content:
+                content = content.replace('host = 127.0.0.1', 'host = 0.0.0.0')
+                zope_ini_path.write_text(content)
+                print("Updated zope.ini to bind to 0.0.0.0 for Docker")
+    
     os.execvpe(
         f"{VENV_DIR}/bin/runwsgi",
         ["runwsgi", "etc/zope.ini"],

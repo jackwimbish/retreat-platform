@@ -2,4 +2,8 @@
 resend
 python-dotenv
 
-# Plone requirements (add your existing packages here)
+# HTTP requests (for init script)
+requests
+
+# Plone requirements
+plone.volto

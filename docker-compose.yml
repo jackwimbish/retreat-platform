@@ -1,0 +1,65 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # Docker environment flag
+      - DOCKER_CONTAINER=1
+      # CORS settings
+      - CORS_ALLOW_ORIGIN=*
+      - CORS_ALLOW_METHODS=DELETE,GET,OPTIONS,PATCH,POST,PUT
+      - CORS_ALLOW_CREDENTIALS=true
+      - CORS_ALLOW_HEADERS=Accept,Authorization,Content-Type,X-CSRF-TOKEN
+      - CORS_EXPOSE_HEADERS=Content-Length,X-My-Header
+      - CORS_MAX_AGE=3600
+    volumes:
+      # Mount source code for development
+      - ./backend:/app
+      # Use named volumes for data persistence
+      - plone-filestorage:/app/instance/var/filestorage
+      - plone-blobstorage:/app/instance/var/blobstorage
+      # Don't override the virtual environment
+      - /app/venv
+    networks:
+      - retreat-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/Plone"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - RAZZLE_INTERNAL_API_PATH=http://backend:8080/Plone
+      - RAZZLE_API_PATH=http://localhost:3000/++api++
+      - RAZZLE_DEV_PROXY_API_PATH=http://backend:8080/Plone
+    volumes:
+      # Mount source code for development with hot reload
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      # Don't override node_modules
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - retreat-network
+
+networks:
+  retreat-network:
+    driver: bridge
+
+volumes:
+  plone-filestorage:
+  plone-blobstorage:

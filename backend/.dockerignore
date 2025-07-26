@@ -1,0 +1,45 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Plone var directory (will be created fresh in container)
+instance/var/
+
+# Plone configuration (will be generated fresh in container)
+instance/etc/zope.conf
+instance/etc/zope.ini
+instance/etc/zope-auto.ini
+instance/etc/site.zcml
+
+# Environment files
+.env
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Temporary files
+*.tmp
+*.log
