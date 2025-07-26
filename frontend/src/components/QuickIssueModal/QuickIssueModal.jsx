@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Modal,
   Button,
@@ -25,6 +25,7 @@ import './QuickIssueModal.css';
 const QuickIssueModal = ({ headerMode = false }) => {
   const dispatch = useDispatch();
   const history = useHistory();
+  const token = useSelector((state) => state.userSession?.token);
   
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -107,12 +108,19 @@ const QuickIssueModal = ({ headerMode = false }) => {
     setLoading(true);
     
     try {
+      // Build headers with auth token if available
+      const headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch('/++api++/issues', {
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         credentials: 'same-origin',
         body: JSON.stringify({
           '@type': 'issue',
