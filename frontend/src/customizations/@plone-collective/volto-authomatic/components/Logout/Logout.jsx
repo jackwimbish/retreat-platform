@@ -38,6 +38,7 @@ function Logout({ intl }) {
       <Toast
         info
         title={intl.formatMessage(messages.loggedOut)}
+        content=""
       />,
     );
     

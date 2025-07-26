@@ -298,9 +298,9 @@ const UserRoleManager = () => {
 
           <Segment basic>
             <Header as="h4">Role Descriptions:</Header>
-            <p><Label color="blue">Participant (Member)</Label> Can view and create issues</p>
-            <p><Label color="green">Staff (Editor)</Label> Can view, create, and edit all issues</p>
-            <p><Label color="purple">Director (Manager)</Label> Full administrative access</p>
+            <div style={{ marginBottom: '0.5em' }}><Label color="blue">Participant (Member)</Label> Can view and create issues</div>
+            <div style={{ marginBottom: '0.5em' }}><Label color="green">Staff (Editor)</Label> Can view, create, and edit all issues</div>
+            <div style={{ marginBottom: '0.5em' }}><Label color="purple">Director (Manager)</Label> Full administrative access</div>
           </Segment>
         </Segment>
       )}
