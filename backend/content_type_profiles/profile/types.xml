@@ -3,4 +3,6 @@
   <object name="issue" meta_type="Dexterity FTI"/>
   <object name="participant" meta_type="Dexterity FTI"/>
   <object name="camp_alert" meta_type="Dexterity FTI"/>
+  <object name="conference_room" meta_type="Dexterity FTI"/>
+  <object name="room_booking" meta_type="Dexterity FTI"/>
 </object>

@@ -242,12 +242,12 @@ const HomepageView = (props) => {
             </Card>
           </Grid.Column>
           <Grid.Column>
-            <Card fluid className="action-card disabled">
+            <Card fluid as={Link} to="/conference-rooms" className="action-card">
               <Card.Content textAlign="center">
-                <Icon name="bed" size="huge" color="grey" />
-                <Card.Header>Room Management</Card.Header>
+                <Icon name="calendar alternate" size="huge" color="teal" />
+                <Card.Header>Book a Room</Card.Header>
                 <Card.Description>
-                  Coming soon...
+                  Reserve conference rooms for meetings
                 </Card.Description>
               </Card.Content>
             </Card>

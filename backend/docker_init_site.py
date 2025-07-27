@@ -269,67 +269,90 @@ if 'camp_alert' not in portal_types:
         'volto.blocks',
     )
     
-    # Define the schema
-    fti.model_source = """
-<model xmlns:i18n="http://xml.zope.org/namespaces/i18n"
-       xmlns:security="http://namespaces.plone.org/supermodel/security"
-       xmlns:form="http://namespaces.plone.org/supermodel/form"
-       xmlns:marshal="http://namespaces.plone.org/supermodel/marshal"
-       xmlns="http://namespaces.plone.org/supermodel/schema">
-  <schema>
-    <field name="alert_type" type="zope.schema.Choice">
-      <default>info</default>
-      <description>Type of alert being sent</description>
-      <title>Alert Type</title>
-      <values>
-        <element>emergency</element>
-        <element>event</element>
-        <element>info</element>
-      </values>
-    </field>
-    <field name="message" type="zope.schema.Text">
-      <description>The alert message to send to all camp members</description>
-      <required>True</required>
-      <title>Message</title>
-    </field>
-    <field name="active" type="zope.schema.Bool">
-      <default>True</default>
-      <description>Whether this alert is currently active</description>
-      <required>False</required>
-      <title>Active</title>
-    </field>
-    <field name="send_immediately" type="zope.schema.Bool" form:mode="hidden">
-      <default>True</default>
-      <description>Send email notification immediately upon creation</description>
-      <required>False</required>
-      <title>Send Immediately</title>
-    </field>
-    <field name="sms_placeholder" type="zope.schema.Text" form:mode="hidden">
-      <description>Placeholder for future SMS functionality</description>
-      <required>False</required>
-      <title>SMS Message (Future)</title>
-    </field>
-    <field name="push_notification_placeholder" type="zope.schema.Text" form:mode="hidden">
-      <description>Placeholder for future push notification functionality</description>
-      <required>False</required>
-      <title>Push Notification (Future)</title>
-    </field>
-  </schema>
-</model>
-"""
+    # Use Python schema interface
+    fti.schema = 'retreat.interfaces.ICampAlert'
     
     portal_types._setObject('camp_alert', fti)
     # Ensure icon_expr is properly initialized
     alert_fti = portal_types['camp_alert']
     alert_fti._updateProperty('icon_expr', 'string:bell')
-    # Set custom add permission
-    alert_fti.add_permission = 'retreat.AddCampAlert'
+    # Set custom add permission - use standard permission for now
+    alert_fti.add_permission = 'cmf.AddPortalContent'
     print("✓ Camp Alert content type created")
 else:
     print("! Camp Alert content type already exists - updating icon")
     alert_fti = portal_types['camp_alert']
     alert_fti._updateProperty('icon_expr', 'string:bell')
-    alert_fti.add_permission = 'retreat.AddCampAlert'
+    alert_fti.add_permission = 'cmf.AddPortalContent'
+
+# Create Conference Room content type
+if 'conference_room' not in portal_types:
+    print("Creating Conference Room content type...")
+    fti = DexterityFTI('conference_room')
+    fti.title = 'Conference Room'
+    fti.description = 'A bookable conference room'
+    fti.icon_expr = 'string:folder'
+    fti.factory = 'conference_room'
+    fti.add_view_expr = 'string:${folder_url}/++add++conference_room'
+    fti.global_allow = False
+    fti.filter_content_types = True
+    fti.allowed_content_types = []
+    fti.allow_discussion = False
+    fti.default_view = 'view'
+    fti.view_methods = ('view',)
+    
+    # Enable behaviors
+    fti.behaviors = (
+        'plone.namefromtitle',
+        'plone.basic',
+        'plone.ownership',
+        'plone.categorization',
+        'plone.locking',
+    )
+    
+    # Use Python schema interface
+    fti.schema = 'retreat.interfaces.IConferenceRoom'
+    
+    portal_types._setObject('conference_room', fti)
+    room_fti = portal_types['conference_room']
+    room_fti._updateProperty('icon_expr', 'string:folder')
+    print("✓ Conference Room content type created")
+else:
+    print("! Conference Room content type already exists")
+
+# Create Room Booking content type
+if 'room_booking' not in portal_types:
+    print("Creating Room Booking content type...")
+    fti = DexterityFTI('room_booking')
+    fti.title = 'Room Booking'
+    fti.description = 'A conference room booking'
+    fti.icon_expr = 'string:event'
+    fti.factory = 'room_booking'
+    fti.add_view_expr = 'string:${folder_url}/++add++room_booking'
+    fti.global_allow = False
+    fti.filter_content_types = True
+    fti.allowed_content_types = []
+    fti.allow_discussion = False
+    fti.default_view = 'view'
+    fti.view_methods = ('view',)
+    
+    # Enable behaviors
+    fti.behaviors = (
+        'plone.namefromtitle',
+        'plone.basic',
+        'plone.ownership',
+        'plone.locking',
+    )
+    
+    # Use Python schema interface
+    fti.schema = 'retreat.interfaces.IRoomBooking'
+    
+    portal_types._setObject('room_booking', fti)
+    booking_fti = portal_types['room_booking']
+    booking_fti._updateProperty('icon_expr', 'string:event')
+    print("✓ Room Booking content type created")
+else:
+    print("! Room Booking content type already exists")
 
 # Update permissions if needed
 plone.reindexObject()
@@ -390,11 +413,7 @@ if 'participant' in portal_types:
     
     print("✓ Participant permissions configured")
 
-# Configure Camp Alert permissions
-if 'camp_alert' in portal_types:
-    # Set the custom permission to only allow Directors and Staff
-    plone.manage_permission('retreat: Add Camp Alert', ['Manager', 'Editor'], acquire=False)
-    print("✓ Camp Alert permissions configured - only Directors and Staff can create alerts")
+# Camp Alert permissions are controlled via folder permissions and standard content permissions
 
 # Set site-wide add permission
 plone.manage_permission('Add portal content', ['Manager', 'Editor', 'Member'], acquire=True)
@@ -519,10 +538,13 @@ if 'alerts' not in plone.objectIds():
                        description='Emergency alerts and announcements')
     alerts_folder = plone['alerts']
     
-    # Set permissions for alerts folder - only staff can view/access
+    # Set permissions for alerts folder - all authenticated users can view, only staff can manage
     folder_permissions = [
-        ('View', ['Manager', 'Editor']),
-        ('Access contents information', ['Manager', 'Editor']),
+        ('View', ['Manager', 'Editor', 'Member', 'Authenticated']),
+        ('Access contents information', ['Manager', 'Editor', 'Member', 'Authenticated']),
+        ('Add portal content', ['Manager', 'Editor']),
+        ('Modify portal content', ['Manager', 'Editor']),
+        ('Delete objects', ['Manager', 'Editor']),
     ]
     
     for permission, roles in folder_permissions:
@@ -531,6 +553,54 @@ if 'alerts' not in plone.objectIds():
     print("✓ Alerts folder created")
 else:
     print("! Alerts folder already exists")
+
+# Create Conference Rooms folder (as Document in Volto)
+if 'conference-rooms' not in plone.objectIds():
+    plone.invokeFactory('Document', 'conference-rooms',
+                       title='Conference Rooms',
+                       description='Book conference rooms for meetings and events')
+    rooms_folder = plone['conference-rooms']
+    
+    # Set permissions for conference rooms folder
+    folder_permissions = [
+        ('View', ['Manager', 'Editor', 'Member', 'Authenticated']),
+        ('Access contents information', ['Manager', 'Editor', 'Member', 'Authenticated']),
+        ('Add portal content', ['Manager', 'Editor', 'Member']),
+        ('Modify portal content', ['Manager', 'Editor']),
+        ('Delete objects', ['Manager', 'Editor']),
+    ]
+    
+    for permission, roles in folder_permissions:
+        rooms_folder.manage_permission(permission, roles=roles, acquire=False)
+    
+    # Create the initial conference rooms
+    rooms_data = [
+        ('downstairs-room-1', 'Downstairs Room 1', 4),
+        ('downstairs-room-2', 'Downstairs Room 2', 4),
+        ('upstairs-room-1', 'Upstairs Room 1', 4),
+        ('upstairs-room-2', 'Upstairs Room 2', 2),
+        ('upstairs-room-3', 'Upstairs Room 3', 2),
+    ]
+    
+    for room_id, room_title, capacity in rooms_data:
+        rooms_folder.invokeFactory('conference_room', room_id,
+                                 title=room_title,
+                                 capacity=capacity)
+        print(f"  ✓ Created {room_title} (capacity: {capacity})")
+    
+    # Create bookings subfolder
+    rooms_folder.invokeFactory('Folder', 'bookings',
+                             title='Bookings',
+                             description='All room bookings')
+    bookings_folder = rooms_folder['bookings']
+    
+    # Set permissions for bookings folder
+    for permission, roles in folder_permissions:
+        bookings_folder.manage_permission(permission, roles=roles, acquire=False)
+    
+    print("✓ Conference Rooms folder created with 5 rooms")
+else:
+    print("! Conference Rooms folder already exists")
 
 transaction.commit()
 print("✓ Default content structure created!")
@@ -559,6 +629,10 @@ print("✓ Participants set to use one_state_workflow")
 # Set Camp Alert to use one_state_workflow (always published when created)
 wf_tool.setChainForPortalTypes(['camp_alert'], 'one_state_workflow')
 print("✓ Camp Alerts set to use one_state_workflow")
+
+# Set Conference Room and Room Booking to use one_state_workflow
+wf_tool.setChainForPortalTypes(['conference_room', 'room_booking'], 'one_state_workflow')
+print("✓ Conference Rooms and Bookings set to use one_state_workflow")
 
 # Update security
 wf_tool.updateRoleMappings()

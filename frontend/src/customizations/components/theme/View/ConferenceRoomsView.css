@@ -1,0 +1,293 @@
+/* Conference Rooms View Styles */
+
+.conference-rooms-view {
+  margin: 2rem auto;
+  max-width: 100%;
+}
+
+.conference-rooms-view .ui.header {
+  color: #333;
+}
+
+/* Room selector segment */
+.conference-rooms-view .ui.segment {
+  margin-bottom: 1rem;
+}
+
+/* Calendar container */
+.calendar-container {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+/* Calendar table */
+.booking-calendar {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.booking-calendar th,
+.booking-calendar td {
+  border: 1px solid #dee2e6;
+}
+
+/* Time column header */
+.booking-calendar .time-header-column {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  padding: 0.75rem;
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  min-width: 80px;
+  width: 80px;
+}
+
+/* Day headers */
+.booking-calendar .day-header {
+  background-color: #f8f9fa;
+  text-align: center;
+  padding: 0.5rem;
+  min-width: 120px;
+}
+
+.day-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.day-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Time labels */
+.booking-calendar .time-label-cell {
+  background-color: #f8f9fa;
+  font-weight: normal;
+  font-size: 0.85rem;
+  text-align: right;
+  padding: 0.5rem 0.75rem;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: 80px;
+}
+
+/* Booking cells */
+.booking-cell {
+  padding: 0.5rem;
+  min-height: 50px;
+  height: 50px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  vertical-align: top;
+  width: 120px;
+}
+
+.booking-cell.empty {
+  background-color: white;
+}
+
+.booking-cell.empty.available:hover {
+  background-color: #e3f2fd;
+  cursor: pointer;
+}
+
+.booking-cell.empty.past {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.booking-cell.booked {
+  padding: 0.5rem;
+  background-color: transparent;
+  cursor: default;
+  vertical-align: top;
+}
+
+/* Booking block */
+.booking-block {
+  background-color: #2185d0;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  height: calc(100% - 4px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  position: relative;
+}
+
+.booking-block.own-booking {
+  background-color: #21ba45;
+}
+
+/* Booking header with cancel button */
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.booking-header .cancel-icon {
+  color: white;
+  opacity: 0.8;
+  font-size: 0.9rem;
+  margin: -0.2rem -0.2rem 0 0;
+  transition: opacity 0.2s;
+}
+
+.booking-header .cancel-icon:hover {
+  opacity: 1;
+}
+
+.booking-title {
+  font-weight: bold;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  padding-right: 0.5rem;
+}
+
+.booking-purpose {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking-time {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin-top: auto;
+}
+
+/* Add booking icon */
+.add-booking-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #2185d0;
+}
+
+.booking-cell.empty.available:hover .add-booking-icon {
+  opacity: 1;
+}
+
+/* Week navigation */
+.conference-rooms-view .ui.button.group {
+  margin-bottom: 0;
+}
+
+/* Room selector */
+.conference-rooms-view .ui.dropdown {
+  min-width: 300px;
+}
+
+/* Info message */
+.conference-rooms-view .ui.message.info {
+  margin-top: 2rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .conference-rooms-view {
+    margin: 1rem;
+  }
+  
+  .booking-calendar {
+    font-size: 0.8rem;
+  }
+  
+  .booking-calendar .time-label-cell {
+    font-size: 0.75rem;
+    padding: 0.35rem;
+    min-width: 60px;
+    width: 60px;
+  }
+  
+  .booking-calendar .day-header {
+    min-width: 100px;
+  }
+  
+  .booking-cell {
+    min-height: 40px;
+    height: 40px;
+    width: 100px;
+  }
+  
+  .booking-title {
+    font-size: 0.75rem;
+  }
+  
+  .booking-purpose {
+    display: none;
+  }
+  
+  .booking-time {
+    font-size: 0.65rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .conference-rooms-view .ui.button {
+    display: none;
+  }
+  
+  .conference-rooms-view .ui.dropdown {
+    border: none;
+  }
+  
+  .booking-cell.empty {
+    background-color: white !important;
+  }
+  
+  .add-booking-icon {
+    display: none;
+  }
+}
+
+/* Scrollbar styling for calendar container */
+.calendar-container::-webkit-scrollbar {
+  height: 10px;
+}
+
+.calendar-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.calendar-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Today's column highlight */
+.booking-calendar .day-header.today {
+  background-color: #fff3cd;
+  font-weight: bold;
+}
+
+.booking-calendar td.today-column {
+  background-color: #fffbf0;
+}
+
+.booking-calendar td.today-column.empty.available:hover {
+  background-color: #e3f2fd;
+}

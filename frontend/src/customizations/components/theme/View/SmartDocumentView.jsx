@@ -7,6 +7,7 @@ import DefaultView from '@plone/volto/components/theme/View/DefaultView';
 import IssuesFolderView from './IssuesFolderView';
 import DirectoryView from './DirectoryView';
 import AlertsFolderView from './AlertsFolderView';
+import ConferenceRoomsView from './ConferenceRoomsView';
 
 const SmartDocumentView = (props) => {
   const { content } = props;
@@ -25,6 +26,12 @@ const SmartDocumentView = (props) => {
   if (content.id === 'alerts' || content.title === 'Camp Alerts') {
     console.log('Using AlertsFolderView for alerts');
     return <AlertsFolderView {...props} />;
+  }
+  
+  // Check if this is the conference rooms folder
+  if (content.id === 'conference-rooms' || content.title === 'Conference Rooms') {
+    console.log('Using ConferenceRoomsView for conference rooms');
+    return <ConferenceRoomsView {...props} />;
   }
   
   // Check if this document contains any issues
