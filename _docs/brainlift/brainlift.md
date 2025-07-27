@@ -10,7 +10,6 @@ This document chronicles my learning journey with Plone 6 and the development of
 I came into this project with:
 - Strong familiarity with Python 2
 - No prior experience with Plone CMS
-- Limited exposure to modern Python web frameworks
 - Basic understanding of React
 
 ### The Assignment
@@ -97,6 +96,108 @@ This separation of concerns made the system much more flexible than traditional 
    - Subscribers for content lifecycle events
    - Automatic activity logging
    - Email notifications triggered by events
+
+### Creating Backend Endpoints in Detail
+
+One of the key patterns I discovered was how to properly add REST API endpoints to Plone. Here's the complete process:
+
+#### Step 1: Create the Service Class
+Create a Python file in `/backend/src/retreat/` with a Service class that inherits from `plone.restapi.services.Service`:
+
+```python
+from plone.restapi.services import Service
+from plone import api
+import json
+
+class MyEndpoint(Service):
+    """Description of endpoint functionality"""
+    
+    def reply(self):
+        # Access request parameters
+        param = self.request.get('param_name')
+        
+        # For POST/PATCH, get JSON body
+        data = json.loads(self.request.get('BODY', '{}'))
+        
+        # Set HTTP status if needed
+        self.request.response.setStatus(201)
+        
+        # Return JSON-serializable data
+        return {'result': 'data'}
+```
+
+#### Step 2: Register in api.zcml
+Add the service registration to `/backend/src/retreat/api.zcml`:
+
+```xml
+<plone:service
+    method="GET"
+    for="*"
+    factory=".my_module.MyEndpoint"
+    name="@my-endpoint"
+    permission="zope2.View"
+    />
+```
+
+Key registration attributes:
+- `method`: HTTP method (GET, POST, PATCH, DELETE)
+- `for`: Context type (`*` for any context, or specific interface)
+- `factory`: Python path to your Service class
+- `name`: Endpoint name (convention: prefix with `@`)
+- `permission`: Access control (`zope.Public` for no auth, `zope2.View` for authenticated)
+
+#### Step 3: Package Integration
+The endpoints are automatically loaded because:
+1. `/backend/instance/etc/package-includes/retreat-configure.zcml` includes the retreat package
+2. `/backend/src/retreat/configure.zcml` includes `api.zcml`
+3. Plone's site.zcml loads all package-includes files on startup
+
+#### Common Patterns I Learned
+
+1. **Multiple HTTP Methods for Same Endpoint**:
+   ```xml
+   <plone:service method="GET" factory=".api.ActivitiesGet" name="@activities" />
+   <plone:service method="POST" factory=".api.ActivitiesPost" name="@activities" />
+   ```
+
+2. **Expandable Elements** (for including data in content serialization):
+   ```python
+   @implementer(IExpandableElement)
+   @adapter(Interface, Interface)
+   class Activities:
+       def __call__(self, expand=False):
+           if expand:
+               return {'activities': {'items': [...]}}
+   ```
+
+3. **Error Handling**:
+   ```python
+   if not param:
+       self.request.response.setStatus(400)
+       return {'error': 'Parameter required'}
+   ```
+
+4. **Authentication Checks**:
+   ```python
+   if api.user.is_anonymous():
+       self.request.response.setStatus(401)
+       return {'error': 'Authentication required'}
+   ```
+
+5. **Context Type Verification**:
+   ```python
+   if getattr(self.context, 'portal_type', None) != 'issue':
+       self.request.response.setStatus(400)
+       return {'error': 'This endpoint is only for issues'}
+   ```
+
+#### URL Access Patterns
+Endpoints are accessible at:
+- Backend direct: `http://localhost:8080/Plone/@my-endpoint`
+- Through frontend proxy: `/++api++/@my-endpoint`
+- On specific content: `/++api++/path/to/content/@my-endpoint`
+
+This RESTful pattern integrates seamlessly with Plone's security model and component architecture, making it straightforward to extend the API with new functionality.
 
 ### Frontend Development Patterns
 
