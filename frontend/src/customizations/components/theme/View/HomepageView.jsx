@@ -29,13 +29,6 @@ const HomepageView = (props) => {
   const token = useSelector((state) => state.userSession?.token);
   const [recentIssues, setRecentIssues] = useState([]);
   const [activeAlerts, setActiveAlerts] = useState([]);
-  const [issueStats, setIssueStats] = useState({
-    total: 0,
-    new: 0,
-    inProgress: 0,
-    critical: 0,
-    high: 0,
-  });
   const [loading, setLoading] = useState(true);
 
   // Fetch issues data
@@ -60,27 +53,6 @@ const HomepageView = (props) => {
         if (recentResponse.ok) {
           const recentData = await recentResponse.json();
           setRecentIssues(recentData.items || []);
-        }
-
-        // Fetch all issues for statistics (lightweight, no full objects)
-        const statsResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=status&metadata_fields=priority&b_size=1000', {
-          headers,
-          credentials: 'same-origin',
-        });
-        
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json();
-          const allIssues = statsData.items || [];
-          
-          // Calculate statistics
-          const stats = {
-            total: allIssues.length,
-            new: allIssues.filter(i => (i.status?.token || i.status) === 'new').length,
-            inProgress: allIssues.filter(i => (i.status?.token || i.status) === 'in_progress').length,
-            critical: allIssues.filter(i => (i.priority?.token || i.priority) === 'critical').length,
-            high: allIssues.filter(i => (i.priority?.token || i.priority) === 'high').length,
-          };
-          setIssueStats(stats);
         }
         
         // Fetch active alerts
@@ -165,52 +137,6 @@ const HomepageView = (props) => {
         </div>
       )}
 
-      {/* Quick Stats */}
-      <Grid stackable columns={4} className="stats-grid">
-        <Grid.Column>
-          <Card fluid className="stat-card">
-            <Card.Content>
-              <Statistic size="small">
-                <Statistic.Value>
-                  <Icon name="clipboard list" />
-                  {issueStats.total}
-                </Statistic.Value>
-                <Statistic.Label>Total Issues</Statistic.Label>
-              </Statistic>
-            </Card.Content>
-          </Card>
-        </Grid.Column>
-        <Grid.Column>
-          <Card fluid className="stat-card new">
-            <Card.Content>
-              <Statistic size="small" color="red">
-                <Statistic.Value>{issueStats.new}</Statistic.Value>
-                <Statistic.Label>New Issues</Statistic.Label>
-              </Statistic>
-            </Card.Content>
-          </Card>
-        </Grid.Column>
-        <Grid.Column>
-          <Card fluid className="stat-card progress">
-            <Card.Content>
-              <Statistic size="small" color="yellow">
-                <Statistic.Value>{issueStats.inProgress}</Statistic.Value>
-                <Statistic.Label>In Progress</Statistic.Label>
-              </Statistic>
-            </Card.Content>
-          </Card>
-        </Grid.Column>
-        <Grid.Column>
-          <Card fluid className="stat-card alerts">
-            <Card.Content>
-              <Statistic size="small" color="orange">
-                <Statistic.Value>{issueStats.critical + issueStats.high}</Statistic.Value>
-                <Statistic.Label>High Priority</Statistic.Label>
-              </Statistic>
-            </Card.Content>
-          </Card>
-        </Grid.Column>
-      </Grid>
 
       {/* Quick Links */}
       <Segment className="quick-links-section">
@@ -222,7 +148,7 @@ const HomepageView = (props) => {
           <Grid.Column>
             <Card fluid as={Link} to="/issues" className="action-card">
               <Card.Content textAlign="center">
-                <Icon name="clipboard list" size="huge" color="blue" />
+                <Icon name="tasks" size="huge" color="blue" />
                 <Card.Header>Issues Dashboard</Card.Header>
                 <Card.Description>
                   View and manage all maintenance issues
@@ -300,107 +226,72 @@ const HomepageView = (props) => {
         </Segment>
       )}
 
-      <Grid stackable>
-        <Grid.Row>
-          {/* Recent Issues */}
-          <Grid.Column width={10}>
-            <Segment className="recent-issues">
-              <Header as="h2">
-                <Icon name="history" />
-                Recent Issues
-              </Header>
-              {loading ? (
-                <p>Loading recent issues...</p>
-              ) : recentIssues.length > 0 ? (
-                <List divided relaxed>
-                  {recentIssues.map((issue) => {
-                    const statusValue = issue.status?.token || issue.status || 'new';
-                    const priorityValue = issue.priority?.token || issue.priority || 'normal';
-                    const statusColor = {
-                      new: 'red',
-                      in_progress: 'yellow',
-                      resolved: 'green'
-                    }[statusValue] || 'grey';
-                    const priorityColor = {
-                      critical: 'red',
-                      high: 'orange',
-                      normal: 'blue',
-                      low: 'grey'
-                    }[priorityValue] || 'grey';
+      {/* Recent Issues - Full Width */}
+      <Segment className="recent-issues">
+        <Header as="h2">
+          <Icon name="history" />
+          Recent Issues
+        </Header>
+        {loading ? (
+          <p>Loading recent issues...</p>
+        ) : recentIssues.length > 0 ? (
+          <List divided relaxed>
+            {recentIssues.map((issue) => {
+              const statusValue = issue.status?.token || issue.status || 'new';
+              const priorityValue = issue.priority?.token || issue.priority || 'normal';
+              const statusColor = {
+                new: 'red',
+                in_progress: 'yellow',
+                resolved: 'green'
+              }[statusValue] || 'grey';
+              const priorityColor = {
+                critical: 'red',
+                high: 'orange',
+                normal: 'blue',
+                low: 'grey'
+              }[priorityValue] || 'grey';
 
-                    return (
-                      <List.Item key={issue['@id']}>
-                        <List.Content floated="right">
-                          <Label color={statusColor} size="small">
-                            {issue.status?.title || statusValue}
-                          </Label>
-                        </List.Content>
-                        <List.Icon name="clipboard outline" size="large" verticalAlign="middle" />
-                        <List.Content>
-                          <List.Header as={Link} to={flattenToAppURL(issue['@id'])}>
-                            {issue.title}
-                          </List.Header>
-                          <List.Description>
-                            <Label color={priorityColor} size="tiny">
-                              {issue.priority?.title || priorityValue}
-                            </Label>
-                            {issue.location && (
-                              <>
-                                <Icon name="map marker alternate" />
-                                {issue.location}
-                              </>
-                            )}
-                            {issue.created && (
-                              <span className="issue-date">
-                                <FormattedDate date={issue.created} />
-                              </span>
-                            )}
-                          </List.Description>
-                        </List.Content>
-                      </List.Item>
-                    );
-                  })}
-                </List>
-              ) : (
-                <p>No issues found.</p>
-              )}
-              <Divider />
-              <Button as={Link} to="/issues" fluid basic primary>
-                View All Issues
-                <Icon name="arrow right" />
-              </Button>
-            </Segment>
-          </Grid.Column>
-
-          {/* Coming Soon Sidebar */}
-          <Grid.Column width={6}>
-            <Segment className="upcoming-features">
-              <Header as="h3">
-                <Icon name="rocket" />
-                Coming Soon
-              </Header>
-              <List>
-                <List.Item>
-                  <List.Icon name="users" />
-                  <List.Content>Guest Management</List.Content>
+              return (
+                <List.Item key={issue['@id']}>
+                  <List.Content floated="right">
+                    <Label color={statusColor} size="small">
+                      {issue.status?.title || statusValue}
+                    </Label>
+                  </List.Content>
+                  <List.Icon name="clipboard outline" size="large" verticalAlign="middle" />
+                  <List.Content>
+                    <List.Header as={Link} to={flattenToAppURL(issue['@id'])}>
+                      {issue.title}
+                    </List.Header>
+                    <List.Description>
+                      <Label color={priorityColor} size="tiny">
+                        {issue.priority?.title || priorityValue}
+                      </Label>
+                      {issue.location && (
+                        <>
+                          <Icon name="map marker alternate" />
+                          {issue.location}
+                        </>
+                      )}
+                      {issue.created && (
+                        <span className="issue-date">
+                          <FormattedDate date={issue.created} />
+                        </span>
+                      )}
+                    </List.Description>
+                  </List.Content>
                 </List.Item>
-                <List.Item>
-                  <List.Icon name="calendar alternate" />
-                  <List.Content>Booking Calendar</List.Content>
-                </List.Item>
-                <List.Item>
-                  <List.Icon name="chart bar" />
-                  <List.Content>Analytics & Reports</List.Content>
-                </List.Item>
-                <List.Item>
-                  <List.Icon name="bell" />
-                  <List.Content>Email Notifications</List.Content>
-                </List.Item>
-              </List>
-            </Segment>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+              );
+            })}
+          </List>
+        ) : (
+          <p>No issues found.</p>
+        )}
+        <Divider />
+        <Button as={Link} to="/issues" fluid basic primary>
+          <Icon name="tasks" /> View All Issues
+        </Button>
+      </Segment>
     </Container>
   );
 };

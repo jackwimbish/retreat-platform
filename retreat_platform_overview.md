@@ -35,9 +35,9 @@ We will build the following six new features on top of the Plone 6.1 foundation:
 
 4. **SSO Integration:** Sign in with your Google account or other common SSO providers.
 
-5. **Event Calendar:** A calendar for group events. Admins should be able to post to the calendar, participants should be able to view.
+5. **Email Notifications:** A notification system to alert admins and participants of new issue reports.
 
-6. **Email Notifications:** A notification system to alert admins and participants of new issue reports.
+6. **Alert System:** Send e-mail alerts and show alerts on the home page for emergencies or sudden events.
 
 ## 6. Measures of Success
 
