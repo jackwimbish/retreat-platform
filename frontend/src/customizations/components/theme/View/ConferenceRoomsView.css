@@ -88,6 +88,19 @@
   width: 120px;
 }
 
+/* Booking cells with bookings */
+.booking-cell.has-booking {
+  padding: 0;
+  vertical-align: top;
+}
+
+/* Continuation cells for multi-slot bookings */
+.booking-cell.booked-continuation {
+  background-color: transparent;
+  border-top: none;
+  cursor: default;
+}
+
 .booking-cell.empty {
   background-color: white;
 }
@@ -105,7 +118,7 @@
 .booking-cell.booked {
   padding: 0.5rem;
   background-color: transparent;
-  cursor: default;
+  cursor: pointer;
   vertical-align: top;
 }
 
@@ -115,12 +128,35 @@
   color: white;
   padding: 0.5rem;
   border-radius: 4px;
-  height: calc(100% - 4px);
+  min-height: 46px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   font-size: 0.85rem;
-  position: relative;
+  position: absolute;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  z-index: 1;
+}
+
+/* Calculate booking block height based on span */
+.booking-cell[data-span="1"] .booking-block { height: calc(50px - 4px); }
+.booking-cell[data-span="2"] .booking-block { height: calc(100px - 4px); }
+.booking-cell[data-span="3"] .booking-block { height: calc(150px - 4px); }
+.booking-cell[data-span="4"] .booking-block { height: calc(200px - 4px); }
+.booking-cell[data-span="5"] .booking-block { height: calc(250px - 4px); }
+.booking-cell[data-span="6"] .booking-block { height: calc(300px - 4px); }
+.booking-cell[data-span="7"] .booking-block { height: calc(350px - 4px); }
+.booking-cell[data-span="8"] .booking-block { height: calc(400px - 4px); }
+.booking-cell[data-span="9"] .booking-block { height: calc(450px - 4px); }
+.booking-cell[data-span="10"] .booking-block { height: calc(500px - 4px); }
+
+.booking-block:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .booking-block.own-booking {

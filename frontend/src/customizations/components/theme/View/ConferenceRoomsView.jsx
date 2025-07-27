@@ -48,6 +48,7 @@ const ConferenceRoomsView = (props) => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [cancellingBooking, setCancellingBooking] = useState(null);
+  const [userDisplayNames, setUserDisplayNames] = useState({});
 
   // Time slot configuration (8 AM to 8 PM, 30-minute slots)
   const startHour = 8;
@@ -89,12 +90,21 @@ const ConferenceRoomsView = (props) => {
     const day = startOfWeek.getDay();
     const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Monday start
     startOfWeek.setDate(diff);
+    startOfWeek.setHours(0, 0, 0, 0); // Reset time to start of day
     
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek);
       day.setDate(startOfWeek.getDate() + i);
+      day.setHours(0, 0, 0, 0); // Ensure each day starts at midnight
       week.push(day);
     }
+    
+    console.log('Week dates calculated:', week.map(d => ({
+      date: d.toDateString(),
+      day: d.getDay(),
+      iso: d.toISOString()
+    })));
+    
     return week;
   };
 
@@ -113,7 +123,11 @@ const ConferenceRoomsView = (props) => {
   // Fetch data
   useEffect(() => {
     fetchRooms();
-  }, [token]);
+    // Also fetch current user's display name
+    if (currentUser?.id) {
+      fetchUserDisplayNames([currentUser.id]);
+    }
+  }, [token, currentUser?.id]);
 
   useEffect(() => {
     if (selectedRoom) {
@@ -156,6 +170,40 @@ const ConferenceRoomsView = (props) => {
     }
   };
 
+  // Fetch user display names
+  const fetchUserDisplayNames = async (userIds) => {
+    const uniqueUserIds = [...new Set(userIds)].filter(id => id && !userDisplayNames[id]);
+    if (uniqueUserIds.length === 0) return;
+    
+    const newDisplayNames = {};
+    
+    for (const userId of uniqueUserIds) {
+      try {
+        const response = await fetch(
+          `/++api++/${content?.['@id'] ? content['@id'].replace(window.location.origin, '') : '/'}/@user-display-name?user_id=${encodeURIComponent(userId)}`,
+          {
+            headers: {
+              'Accept': 'application/json',
+            },
+            credentials: 'same-origin',
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          newDisplayNames[userId] = data.display_name;
+        } else {
+          newDisplayNames[userId] = userId; // Fallback to ID
+        }
+      } catch (error) {
+        console.error('Error fetching display name for', userId, error);
+        newDisplayNames[userId] = userId; // Fallback to ID
+      }
+    }
+    
+    setUserDisplayNames(prev => ({ ...prev, ...newDisplayNames }));
+  };
+
   const fetchBookings = async () => {
     setLoading(true);
     setError(null);
@@ -170,9 +218,18 @@ const ConferenceRoomsView = (props) => {
       }
 
       // Fetch bookings for the current week
-      const weekStart = weekDates[0].toISOString();
+      const weekStart = new Date(weekDates[0]);
+      weekStart.setHours(0, 0, 0, 0);
       const weekEnd = new Date(weekDates[6]);
       weekEnd.setHours(23, 59, 59, 999);
+      
+      console.log('Week range:', {
+        weekStart: weekStart.toString(),
+        weekEnd: weekEnd.toString(),
+        weekStartISO: weekStart.toISOString(),
+        weekEndISO: weekEnd.toISOString(),
+        weekDates: weekDates.map(d => d.toDateString())
+      });
       
       const bookingsResponse = await fetch(
         '/++api++/@search?portal_type=room_booking&fullobjects=true&b_size=1000',
@@ -191,7 +248,7 @@ const ConferenceRoomsView = (props) => {
         const weekBookings = (bookingsData.items || []).filter(booking => {
           const bookingStart = parseLocalDateTime(booking.start_datetime);
           const bookingEnd = parseLocalDateTime(booking.end_datetime);
-          const isInWeek = bookingStart <= weekEnd && bookingEnd >= new Date(weekStart);
+          const isInWeek = bookingStart <= weekEnd && bookingEnd >= weekStart;
           
           // Handle different room data structures
           let roomId = null;
@@ -207,7 +264,17 @@ const ConferenceRoomsView = (props) => {
           
           const isForRoom = roomId === selectedRoom['@id'];
           
-          console.log('Booking:', booking.title, 'Room ID:', roomId, 'Is for selected room:', isForRoom, 'Is in week:', isInWeek);
+          console.log('Booking:', booking.title, {
+            roomId,
+            isForRoom,
+            isInWeek,
+            bookingStart: bookingStart.toString(),
+            bookingEnd: bookingEnd.toString(),
+            weekStart: weekStart.toString(),
+            weekEnd: weekEnd.toString(),
+            startInWeek: bookingStart <= weekEnd,
+            endInWeek: bookingEnd >= weekStart
+          });
           
           return isInWeek && isForRoom;
         });
@@ -223,6 +290,10 @@ const ConferenceRoomsView = (props) => {
           });
         });
         setBookings(weekBookings);
+        
+        // Fetch display names for all creators
+        const creatorIds = weekBookings.map(b => b.creators?.[0] || b.Creator).filter(Boolean);
+        await fetchUserDisplayNames(creatorIds);
       }
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -273,11 +344,11 @@ const ConferenceRoomsView = (props) => {
     return bookings.find(booking => {
       const bookingStart = parseLocalDateTime(booking.start_datetime);
       
-      // Debug logging for any Sunday slot
-      if (date.getDay() === 0) {
+      // Debug logging for Monday and Sunday slots
+      if (date.getDay() === 0 || date.getDay() === 1) {
         const matches = Math.abs(bookingStart.getTime() - slotStart.getTime()) < 1000;
-        if (matches || timeSlot.hour === 17) {
-          console.log(`Checking Sunday ${timeSlot.label}:`, {
+        if (matches || (timeSlot.hour === 17 && date.getDay() === 0) || (timeSlot.hour === 10 && date.getDay() === 1)) {
+          console.log(`Checking ${date.toDateString()} ${timeSlot.label}:`, {
             slotStart: slotStart.toString(),
             bookingStart: bookingStart.toString(),
             bookingTitle: booking.title,
@@ -398,9 +469,19 @@ const ConferenceRoomsView = (props) => {
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
       };
       
+      // Get current user's display name
+      let userDisplayName = currentUser?.username || 'User';
+      if (currentUser?.id && !userDisplayNames[currentUser.id]) {
+        // If we don't have the display name yet, fetch it
+        await fetchUserDisplayNames([currentUser.id]);
+      }
+      if (currentUser?.id && userDisplayNames[currentUser.id]) {
+        userDisplayName = userDisplayNames[currentUser.id];
+      }
+      
       const bookingData = {
         '@type': 'room_booking',
-        title: `Booking: ${selectedRoom.title} - ${currentUser?.username || 'User'}`,
+        title: `Booking: ${selectedRoom.title} - ${userDisplayName}`,
         room: selectedRoom['@id'],
         start_datetime: formatAsUTC(bookingForm.start_datetime),
         end_datetime: formatAsUTC(bookingForm.end_datetime),
@@ -475,6 +556,7 @@ const ConferenceRoomsView = (props) => {
       console.log('Ownership check:', {
         bookingCreator: booking.Creator,
         bookingCreators: booking.creators,
+        bookingTitle: booking.title,
         currentUserId: currentUser?.id,
         currentUsername: currentUser?.username,
         isOwner: isOwner
@@ -484,8 +566,8 @@ const ConferenceRoomsView = (props) => {
         element: (
           <td
             key={`${date}-${timeSlot.label}`}
-            className="booking-cell booked"
-            rowSpan={span}
+            className="booking-cell booked has-booking"
+            data-span={span}
           >
             <Popup
               trigger={
@@ -518,7 +600,10 @@ const ConferenceRoomsView = (props) => {
               }
               content={
                 <div>
-                  <p><strong>Booked by:</strong> {booking.Creator}</p>
+                  <p><strong>Booked by:</strong> {(() => {
+                    const creatorId = booking.creators?.[0] || booking.Creator;
+                    return userDisplayNames[creatorId] || creatorId || 'Unknown';
+                  })()}</p>
                   <p><strong>Duration:</strong> {span * 30} minutes</p>
                   {booking.purpose && <p><strong>Purpose:</strong> {booking.purpose}</p>}
                   {isOwner && (
@@ -534,7 +619,8 @@ const ConferenceRoomsView = (props) => {
                 </div>
               }
               position="top center"
-              on="hover"
+              on="click"
+              pinned
             />
           </td>
         ),
@@ -542,7 +628,16 @@ const ConferenceRoomsView = (props) => {
       };
     } else if (isBooked) {
       // This slot is part of a booking but not the start
-      return { element: null, span: 0 };
+      return {
+        element: (
+          <td
+            key={`${date}-${timeSlot.label}`}
+            className="booking-cell booked-continuation"
+          >
+          </td>
+        ),
+        span: 0
+      };
     } else {
       // Empty slot - can be booked
       const isPast = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 
@@ -667,24 +762,11 @@ const ConferenceRoomsView = (props) => {
                 </thead>
                 <tbody>
                   {timeSlots.map((timeSlot, slotIndex) => {
-                    const skipSlots = {};
-                    
                     return (
                       <tr key={timeSlot.label}>
                         <td className="time-label-cell">{timeSlot.label}</td>
                         {weekDates.map((date, dateIndex) => {
-                          const cellKey = `${dateIndex}-${slotIndex}`;
-                          if (skipSlots[dateIndex] && skipSlots[dateIndex] > 0) {
-                            skipSlots[dateIndex]--;
-                            return null;
-                          }
-                          
                           const cellData = renderBookingCell(date, timeSlot, slotIndex);
-                          if (cellData.span > 1) {
-                            // This booking spans multiple time slots
-                            skipSlots[dateIndex] = cellData.span - 1;
-                          }
-                          
                           return cellData.element;
                         })}
                       </tr>
