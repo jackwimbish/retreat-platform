@@ -138,16 +138,14 @@ def _update_activity_log_with_retry(issue, activity_log, max_retries=3):
 
 def log_issue_changes(event):
     """Event subscriber to automatically log issue changes."""
+    import logging
+    logger = logging.getLogger('retreat.activities')
+    
     try:
         issue = event.object
         
         # Only process Issue content type
         if getattr(issue, 'portal_type', None) != 'issue':
-            return
-        
-        # Skip if this is a new object (will be handled by object added event)
-        descriptions = getattr(event, 'descriptions', None)
-        if not descriptions:
             return
         
         # Skip if activity_log field doesn't exist yet (old issues)
@@ -156,40 +154,180 @@ def log_issue_changes(event):
             
         current_user = api.user.get_current()
         
-        for desc in descriptions:
-            if not hasattr(desc, 'attributes'):
-                continue
+        # Log for debugging
+        logger.info(f"Processing issue modification for: {issue.title}")
+        
+        # Get descriptions from event
+        descriptions = getattr(event, 'descriptions', [])
+        if not descriptions:
+            # Sometimes changes come without descriptions, so let's check the object itself
+            # Store the current values to compare on next change
+            logger.info("No descriptions in event, checking stored values")
+            
+            # Get stored values from annotations
+            from zope.annotation.interfaces import IAnnotations
+            annotations = IAnnotations(issue)
+            stored_key = 'retreat.stored_values'
+            stored = annotations.get(stored_key, {})
+            
+            # Check for changes
+            current_status = getattr(issue, 'status', None)
+            current_priority = getattr(issue, 'priority', None)
+            current_assigned = getattr(issue, 'assigned_to', None)
+            
+            # Convert token values to strings for comparison
+            if hasattr(current_status, 'token'):
+                current_status = current_status.token
+            if hasattr(current_priority, 'token'):
+                current_priority = current_priority.token
                 
-            # Get the old values
-            old_values = getattr(desc, 'oldValue', {})
-            if not isinstance(old_values, dict):
-                continue
+            changes_made = False
+            
+            # Check status
+            if stored.get('status') != current_status and stored.get('status') is not None:
+                logger.info(f"Status changed from {stored.get('status')} to {current_status}")
+                add_activity(issue, 'status_change', {
+                    'from': stored.get('status'),
+                    'to': current_status
+                }, current_user)
+                changes_made = True
                 
-            # Check if specific fields changed
-            for attr in desc.attributes:
-                old_value = old_values.get(attr)
-                new_value = getattr(issue, attr, None)
+            # Check priority  
+            if stored.get('priority') != current_priority and stored.get('priority') is not None:
+                logger.info(f"Priority changed from {stored.get('priority')} to {current_priority}")
+                add_activity(issue, 'priority_change', {
+                    'from': stored.get('priority'),
+                    'to': current_priority
+                }, current_user)
+                changes_made = True
                 
-                # Log status changes
-                if attr == 'status' and old_value != new_value:
-                    add_activity(issue, 'status_change', {
-                        'from': old_value,
-                        'to': new_value
-                    }, current_user)
+            # Check assignment
+            if stored.get('assigned_to') != current_assigned and stored.get('assigned_to') is not None:
+                logger.info(f"Assignment changed from {stored.get('assigned_to')} to {current_assigned}")
+                add_activity(issue, 'assignment', {
+                    'from': stored.get('assigned_to'),
+                    'to': current_assigned
+                }, current_user)
+                changes_made = True
+            
+            # Update stored values for next comparison
+            annotations[stored_key] = {
+                'status': current_status,
+                'priority': current_priority,
+                'assigned_to': current_assigned
+            }
+            # Force the annotations to persist
+            annotations._p_changed = True
+            
+            if changes_made:
+                logger.info("Changes logged successfully")
+            
+        else:
+            # Process descriptions if available
+            logger.info(f"Processing {len(descriptions)} descriptions")
+            for i, desc in enumerate(descriptions):
+                logger.info(f"Description {i}: {desc}")
+                logger.info(f"Has attributes: {hasattr(desc, 'attributes')}")
                 
-                # Log priority changes
-                elif attr == 'priority' and old_value != new_value:
-                    add_activity(issue, 'priority_change', {
-                        'from': old_value,
-                        'to': new_value
-                    }, current_user)
+                if not hasattr(desc, 'attributes'):
+                    logger.info(f"Description {i} has no attributes")
+                    continue
+                    
+                logger.info(f"Attributes: {desc.attributes}")
+                    
+                # Get the old values
+                old_values = getattr(desc, 'oldValue', {})
+                logger.info(f"Old values type: {type(old_values)}, content: {old_values}")
                 
-                # Log assignment changes
-                elif attr == 'assigned_to' and old_value != new_value:
-                    add_activity(issue, 'assignment', {
-                        'from': old_value,
-                        'to': new_value
-                    }, current_user)
-    except Exception:
-        # Silently fail to not break the modification process
-        pass
+                if not isinstance(old_values, dict):
+                    logger.info(f"Old values is not a dict, skipping")
+                    continue
+                    
+                # Check if specific fields changed
+                for attr in desc.attributes:
+                    # Extract the actual attribute name from the fully qualified name
+                    # e.g., 'Plone_5_1753631178_2_552559_0_issue.priority' -> 'priority'
+                    if '.' in attr:
+                        simple_attr = attr.split('.')[-1]
+                    else:
+                        simple_attr = attr
+                    
+                    logger.info(f"Extracted attribute name: {simple_attr} from {attr}")
+                    
+                    # Skip non-relevant attributes
+                    if simple_attr not in ['status', 'priority', 'assigned_to']:
+                        continue
+                    
+                    # Get current value
+                    new_value = getattr(issue, simple_attr, None)
+                    
+                    # Get stored value from annotations
+                    from zope.annotation.interfaces import IAnnotations
+                    annotations = IAnnotations(issue)
+                    stored_values = annotations.get('retreat.stored_values', {})
+                    old_value = stored_values.get(simple_attr)
+                    
+                    logger.info(f"Checking attribute '{simple_attr}': old={old_value}, new={new_value}")
+                    
+                    # Handle token values
+                    if hasattr(new_value, 'token'):
+                        new_value = new_value.token
+                        logger.info(f"Converted new token value to: {new_value}")
+                    
+                    # Check if value actually changed
+                    if old_value == new_value:
+                        logger.info(f"No change detected for {simple_attr}")
+                        continue
+                    
+                    # Log status changes
+                    if simple_attr == 'status':
+                        logger.info(f"Status changed from {old_value} to {new_value}")
+                        add_activity(issue, 'status_change', {
+                            'from': old_value,
+                            'to': new_value
+                        }, current_user)
+                    
+                    # Log priority changes
+                    elif simple_attr == 'priority':
+                        logger.info(f"Priority changed from {old_value} to {new_value}")
+                        add_activity(issue, 'priority_change', {
+                            'from': old_value,
+                            'to': new_value
+                        }, current_user)
+                    
+                    # Log assignment changes
+                    elif simple_attr == 'assigned_to':
+                        logger.info(f"Assignment changed from {old_value} to {new_value}")
+                        add_activity(issue, 'assignment', {
+                            'from': old_value,
+                            'to': new_value
+                        }, current_user)
+                        
+            # After processing all descriptions, update stored values
+            current_status = getattr(issue, 'status', None)
+            current_priority = getattr(issue, 'priority', None) 
+            current_assigned = getattr(issue, 'assigned_to', None)
+            
+            # Convert token values
+            if hasattr(current_status, 'token'):
+                current_status = current_status.token
+            if hasattr(current_priority, 'token'):
+                current_priority = current_priority.token
+            if hasattr(current_assigned, 'token'):
+                current_assigned = current_assigned.token
+                
+            # Update stored values for next comparison
+            from zope.annotation.interfaces import IAnnotations
+            annotations = IAnnotations(issue)
+            annotations['retreat.stored_values'] = {
+                'status': current_status,
+                'priority': current_priority,
+                'assigned_to': current_assigned
+            }
+            annotations._p_changed = True
+            logger.info(f"Updated stored values: status={current_status}, priority={current_priority}, assigned_to={current_assigned}")
+                        
+    except Exception as e:
+        logger.error(f"Error in log_issue_changes: {e}")
+        import traceback
+        logger.error(traceback.format_exc())

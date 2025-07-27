@@ -17,13 +17,38 @@ def notify_new_issue(obj, event):
     # Add initial activity log entry for issue creation
     try:
         if hasattr(obj, 'activity_log'):
+            # Get the values, handling token objects
+            status = getattr(obj, 'status', 'new')
+            if hasattr(status, 'token'):
+                status = status.token
+            priority = getattr(obj, 'priority', 'normal')
+            if hasattr(priority, 'token'):
+                priority = priority.token
+                
             activities.add_activity(obj, 'issue_created', {
                 'title': obj.title,
                 'description': getattr(obj, 'issue_description', ''),
                 'location': getattr(obj, 'location', ''),
-                'priority': getattr(obj, 'priority', 'normal'),
-                'status': getattr(obj, 'status', 'new')
+                'priority': priority,
+                'status': status
             })
+            
+            # Store initial values for future comparison
+            from zope.annotation.interfaces import IAnnotations
+            annotations = IAnnotations(obj)
+            
+            # Get assigned_to value, handling token objects
+            assigned_to = getattr(obj, 'assigned_to', None)
+            if hasattr(assigned_to, 'token'):
+                assigned_to = assigned_to.token
+                
+            annotations['retreat.stored_values'] = {
+                'status': status,
+                'priority': priority,
+                'assigned_to': assigned_to
+            }
+            # Force the annotations to persist
+            annotations._p_changed = True
     except Exception as e:
         logger.error(f"Failed to add creation activity: {e}")
     

@@ -27,5 +27,13 @@
       
   <!-- Include API configuration -->
   <include file="api.zcml" />
+  
+  <!-- Register initialization view -->
+  <browser:page
+      name="initialize-issue-stored-values"
+      for="Products.CMFCore.interfaces.ISiteRoot"
+      class=".initialize_stored_values.InitializeStoredValues"
+      permission="zope2.ViewManagementScreens"
+      />
 
 </configure>

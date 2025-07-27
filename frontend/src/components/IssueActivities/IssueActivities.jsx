@@ -47,6 +47,7 @@ const IssueActivities = ({ content }) => {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Activities data:', data.items); // Debug log
         setActivities(data.items || []);
       } else {
         console.error('Failed to fetch activities:', response.status, response.statusText);
@@ -213,7 +214,9 @@ const IssueActivities = ({ content }) => {
                     {isComment ? (
                       activity.data.text
                     ) : (
-                      <em>{formatActivityMessage(activity)}</em>
+                      <span>
+                        <em>{formatActivityMessage(activity)}</em>
+                      </span>
                     )}
                   </Comment.Text>
                 </Comment.Content>

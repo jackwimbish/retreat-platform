@@ -33,7 +33,7 @@ class IssueEditForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      formData: { ...props.formData },
+      formData: { ...(props.formData || {}) },
       errors: {},
       showDeleteConfirm: false,
       deleteLoading: false,

@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { asyncConnect, hasApiExpander } from '@plone/volto/helpers';
 import { defineMessages, injectIntl } from 'react-intl';
-import { Button, Container, Segment, Form as SemanticForm, Message } from 'semantic-ui-react';
+import { Button, Container, Segment, Form as SemanticForm, Message, Icon as SemanticIcon } from 'semantic-ui-react';
 import { Portal } from 'react-portal';
 import qs from 'query-string';
 import { find } from 'lodash';
@@ -292,10 +292,23 @@ class Edit extends Component {
     
     // Check if we're editing an Issue content type
     const isIssue = this.props.content?.['@type'] === 'issue';
+    
+    // Don't render the form if we're still loading content or schema
+    if (isIssue && (!this.props.content || !this.props.schema || this.props.getRequest.loading || this.props.schemaRequest.loading)) {
+      return (
+        <Container>
+          <Segment>
+            <Message>
+              <SemanticIcon name="circle notched" loading />
+              Loading...
+            </Message>
+          </Segment>
+        </Container>
+      );
+    }
 
     const pageEdit = isIssue && this.props.schema && this.props.content ? (
       <IssueEditForm
-        ref={this.form}
         schema={this.props.schema}
         formData={this.props.content}
         onSubmit={this.onSubmit}
@@ -390,7 +403,15 @@ class Edit extends Component {
                     id="toolbar-save"
                     className="save"
                     aria-label={this.props.intl.formatMessage(messages.save)}
-                    onClick={() => this.form.current.onSubmit()}
+                    onClick={() => {
+                      if (isIssue) {
+                        // For issues, we need to trigger the form submission differently
+                        const submitButton = document.querySelector('.issue-edit-form button[type="submit"], .issue-edit-form button.primary');
+                        if (submitButton) submitButton.click();
+                      } else if (this.form.current) {
+                        this.form.current.onSubmit();
+                      }
+                    }}
                     disabled={this.props.updateRequest.loading}
                     loading={this.props.updateRequest.loading}
                   >
