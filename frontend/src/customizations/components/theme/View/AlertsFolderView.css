@@ -1,0 +1,38 @@
+/* Alerts Folder View Styles */
+
+.alerts-folder-view {
+  margin: 2rem auto;
+}
+
+.alerts-folder-view .ui.header {
+  color: #333;
+}
+
+/* Archived alerts styling */
+.alerts-folder-view .ui.table tr.archived {
+  opacity: 0.6;
+  background-color: #f8f9fa;
+}
+
+.alerts-folder-view .ui.table tr.archived:hover {
+  background-color: #e9ecef !important;
+}
+
+/* Button styling */
+.alerts-folder-view .ui.button.primary {
+  background-color: #007bff;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .alerts-folder-view .ui.grid > .row > .column {
+    margin-bottom: 1rem;
+    text-align: center !important;
+  }
+  
+  .alerts-folder-view .ui.table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

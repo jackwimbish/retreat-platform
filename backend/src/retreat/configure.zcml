@@ -4,6 +4,9 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="retreat">
 
+  <!-- Include permissions -->
+  <include file="permissions.zcml" />
+  
   <!-- Public portrait view -->
   <browser:page
       name="public-portrait"
@@ -25,15 +28,14 @@
       handler=".activities.log_issue_changes"
       />
       
+  <!-- Event subscriber for camp alert notifications -->
+  <subscriber
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      handler=".camp_alerts.send_camp_alert"
+      />
+      
   <!-- Include API configuration -->
   <include file="api.zcml" />
-  
-  <!-- Register initialization view -->
-  <browser:page
-      name="initialize-issue-stored-values"
-      for="Products.CMFCore.interfaces.ISiteRoot"
-      class=".initialize_stored_values.InitializeStoredValues"
-      permission="zope2.ViewManagementScreens"
-      />
 
 </configure>

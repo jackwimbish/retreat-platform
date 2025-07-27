@@ -28,6 +28,145 @@
   margin-right: 0.5rem;
 }
 
+/* Active Alerts Section */
+.active-alerts-section {
+  margin-bottom: 2rem;
+}
+
+.active-alert.ui.segment {
+  margin-bottom: 1rem !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none !important;
+  border-left: 5px solid #17a2b8 !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 0 4px 4px 0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  display: block !important;
+  text-decoration: none !important;
+}
+
+.active-alert.ui.segment:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-1px);
+}
+
+.active-alert.emergency {
+  border-left-color: #dc3545 !important;
+  background-color: #fef8f8 !important;
+}
+
+.active-alert.event {
+  border-left-color: #28a745 !important;
+  background-color: #f8fef8 !important;
+}
+
+.active-alert.info {
+  border-left-color: #17a2b8 !important;
+  background-color: #f5fbfd !important;
+}
+
+.active-alert .alert-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.active-alert .alert-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 1.1rem;
+}
+
+.active-alert.emergency .alert-icon {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.active-alert.event .alert-icon {
+  background-color: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+}
+
+.active-alert.info .alert-icon {
+  background-color: rgba(23, 162, 184, 0.15);
+  color: #17a2b8;
+}
+
+.active-alert .alert-icon i {
+  margin: 0 !important;
+}
+
+.active-alert .alert-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.active-alert .alert-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.active-alert .alert-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.active-alert .alert-message {
+  color: #4a5568;
+  margin: 0.25rem 0 0.5rem 0;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.active-alert .alert-meta {
+  font-size: 0.8rem;
+  color: #718096;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.active-alert .alert-meta i {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.active-alert .ui.label {
+  font-size: 0.7rem !important;
+  padding: 0.25em 0.6em !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 !important;
+}
+
+.active-alert.emergency .ui.label {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+.active-alert.event .ui.label {
+  background-color: #28a745 !important;
+  color: white !important;
+}
+
+.active-alert.info .ui.label {
+  background-color: #17a2b8 !important;
+  color: white !important;
+}
+
 /* Stats Grid */
 .stats-grid {
   margin-bottom: 2rem !important;

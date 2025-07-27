@@ -23,6 +23,7 @@ import IssueView from '../components/theme/View/IssueView';
 import IssuesFolderView from '../components/theme/View/IssuesFolderView';
 import SmartDocumentView from '../components/theme/View/SmartDocumentView';
 import HomepageView from '../components/theme/View/HomepageView';
+import CampAlertView from '../components/theme/View/CampAlertView';
 
 const EventView = loadable(() =>
   import('@plone/volto/components/theme/View/EventView'),
@@ -118,6 +119,7 @@ export const contentTypesViews = {
   Image: ImageView,
   Event: EventView,
   issue: IssueView,  // Register our custom Issue view
+  camp_alert: CampAlertView,  // Register our custom Camp Alert view
   Document: SmartDocumentView,  // Smart view that auto-detects Issues
   'Plone Site': HomepageView,  // Custom homepage for the site root
 };

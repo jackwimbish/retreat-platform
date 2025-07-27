@@ -49,6 +49,7 @@ import clearSVG from '@plone/volto/icons/clear.svg';
 
 import config from '@plone/volto/registry';
 import IssueEditForm from './IssueEditForm';
+import CampAlertEditForm from './CampAlertEditForm';
 
 const messages = defineMessages({
   edit: {
@@ -290,11 +291,14 @@ class Edit extends Component {
   render() {
     const editPermission = find(this.props.objectActions, { id: 'edit' });
     
-    // Check if we're editing an Issue content type
-    const isIssue = this.props.content?.['@type'] === 'issue';
+    // Check content type
+    const contentType = this.props.content?.['@type'];
+    const isIssue = contentType === 'issue';
+    const isCampAlert = contentType === 'camp_alert';
+    const isCustomType = isIssue || isCampAlert;
     
     // Don't render the form if we're still loading content or schema
-    if (isIssue && (!this.props.content || !this.props.schema || this.props.getRequest.loading || this.props.schemaRequest.loading)) {
+    if (isCustomType && (!this.props.content || !this.props.schema || this.props.getRequest.loading || this.props.schemaRequest.loading)) {
       return (
         <Container>
           <Segment>
@@ -309,6 +313,16 @@ class Edit extends Component {
 
     const pageEdit = isIssue && this.props.schema && this.props.content ? (
       <IssueEditForm
+        schema={this.props.schema}
+        formData={this.props.content}
+        onSubmit={this.onSubmit}
+        onCancel={this.onCancel}
+        pathname={this.props.pathname}
+        loading={this.props.updateRequest.loading}
+        intl={this.props.intl}
+      />
+    ) : isCampAlert && this.props.schema && this.props.content ? (
+      <CampAlertEditForm
         schema={this.props.schema}
         formData={this.props.content}
         onSubmit={this.onSubmit}
@@ -370,7 +384,7 @@ class Edit extends Component {
               </>
             )}
 
-            {editPermission && this.state.visual && this.state.isClient && !isIssue && (
+            {editPermission && this.state.visual && this.state.isClient && !isCustomType && (
               <Portal node={document.getElementById('sidebar')}>
                 <Sidebar />
               </Portal>
@@ -404,9 +418,9 @@ class Edit extends Component {
                     className="save"
                     aria-label={this.props.intl.formatMessage(messages.save)}
                     onClick={() => {
-                      if (isIssue) {
-                        // For issues, we need to trigger the form submission differently
-                        const submitButton = document.querySelector('.issue-edit-form button[type="submit"], .issue-edit-form button.primary');
+                      if (isCustomType) {
+                        // For custom types, we need to trigger the form submission differently
+                        const submitButton = document.querySelector('.issue-edit-form button[type="submit"], .issue-edit-form button.primary, .camp-alert-edit-form button.primary');
                         if (submitButton) submitButton.click();
                       } else if (this.form.current) {
                         this.form.current.onSubmit();

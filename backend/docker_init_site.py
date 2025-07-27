@@ -240,6 +240,97 @@ else:
     participant_fti = portal_types['participant']
     participant_fti._updateProperty('icon_expr', 'string:user')
 
+# Create Camp Alert content type
+if 'camp_alert' not in portal_types:
+    print("Creating Camp Alert content type...")
+    fti = DexterityFTI('camp_alert')
+    fti.title = 'Camp Alert'
+    fti.description = 'Emergency alerts and announcements for all camp members'
+    fti.icon_expr = 'string:bell'
+    fti.factory = 'camp_alert'
+    fti.add_view_expr = 'string:${folder_url}/++add++camp_alert'
+    fti.global_allow = True
+    fti.filter_content_types = False
+    fti.allowed_content_types = []
+    fti.allow_discussion = False
+    fti.default_view = 'view'
+    fti.view_methods = ('view',)
+    
+    # Enable behaviors
+    fti.behaviors = (
+        'plone.dublin_core',
+        'plone.namefromtitle',
+        'plone.ownership',
+        'plone.publication',
+        'plone.categorization',
+        'plone.basic',
+        'plone.locking',
+        'plone.leadimage',
+        'volto.blocks',
+    )
+    
+    # Define the schema
+    fti.model_source = """
+<model xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+       xmlns:security="http://namespaces.plone.org/supermodel/security"
+       xmlns:form="http://namespaces.plone.org/supermodel/form"
+       xmlns:marshal="http://namespaces.plone.org/supermodel/marshal"
+       xmlns="http://namespaces.plone.org/supermodel/schema">
+  <schema>
+    <field name="alert_type" type="zope.schema.Choice">
+      <default>info</default>
+      <description>Type of alert being sent</description>
+      <title>Alert Type</title>
+      <values>
+        <element>emergency</element>
+        <element>event</element>
+        <element>info</element>
+      </values>
+    </field>
+    <field name="message" type="zope.schema.Text">
+      <description>The alert message to send to all camp members</description>
+      <required>True</required>
+      <title>Message</title>
+    </field>
+    <field name="active" type="zope.schema.Bool">
+      <default>True</default>
+      <description>Whether this alert is currently active</description>
+      <required>False</required>
+      <title>Active</title>
+    </field>
+    <field name="send_immediately" type="zope.schema.Bool" form:mode="hidden">
+      <default>True</default>
+      <description>Send email notification immediately upon creation</description>
+      <required>False</required>
+      <title>Send Immediately</title>
+    </field>
+    <field name="sms_placeholder" type="zope.schema.Text" form:mode="hidden">
+      <description>Placeholder for future SMS functionality</description>
+      <required>False</required>
+      <title>SMS Message (Future)</title>
+    </field>
+    <field name="push_notification_placeholder" type="zope.schema.Text" form:mode="hidden">
+      <description>Placeholder for future push notification functionality</description>
+      <required>False</required>
+      <title>Push Notification (Future)</title>
+    </field>
+  </schema>
+</model>
+"""
+    
+    portal_types._setObject('camp_alert', fti)
+    # Ensure icon_expr is properly initialized
+    alert_fti = portal_types['camp_alert']
+    alert_fti._updateProperty('icon_expr', 'string:bell')
+    # Set custom add permission
+    alert_fti.add_permission = 'retreat.AddCampAlert'
+    print("✓ Camp Alert content type created")
+else:
+    print("! Camp Alert content type already exists - updating icon")
+    alert_fti = portal_types['camp_alert']
+    alert_fti._updateProperty('icon_expr', 'string:bell')
+    alert_fti.add_permission = 'retreat.AddCampAlert'
+
 # Update permissions if needed
 plone.reindexObject()
 transaction.commit()
@@ -298,6 +389,12 @@ if 'participant' in portal_types:
     participant_type.add_permission = 'cmf.AddPortalContent'
     
     print("✓ Participant permissions configured")
+
+# Configure Camp Alert permissions
+if 'camp_alert' in portal_types:
+    # Set the custom permission to only allow Directors and Staff
+    plone.manage_permission('retreat: Add Camp Alert', ['Manager', 'Editor'], acquire=False)
+    print("✓ Camp Alert permissions configured - only Directors and Staff can create alerts")
 
 # Set site-wide add permission
 plone.manage_permission('Add portal content', ['Manager', 'Editor', 'Member'], acquire=True)
@@ -415,6 +512,26 @@ if 'participants' not in plone.objectIds():
 else:
     print("! Participants folder already exists")
 
+# Create Alerts folder (as Document in Volto)
+if 'alerts' not in plone.objectIds():
+    plone.invokeFactory('Document', 'alerts',
+                       title='Camp Alerts',
+                       description='Emergency alerts and announcements')
+    alerts_folder = plone['alerts']
+    
+    # Set permissions for alerts folder - only staff can view/access
+    folder_permissions = [
+        ('View', ['Manager', 'Editor']),
+        ('Access contents information', ['Manager', 'Editor']),
+    ]
+    
+    for permission, roles in folder_permissions:
+        alerts_folder.manage_permission(permission, roles=roles, acquire=False)
+    
+    print("✓ Alerts folder created")
+else:
+    print("! Alerts folder already exists")
+
 transaction.commit()
 print("✓ Default content structure created!")
 
@@ -438,6 +555,10 @@ else:
 # Set Participant to use one_state_workflow too
 wf_tool.setChainForPortalTypes(['participant'], 'one_state_workflow')
 print("✓ Participants set to use one_state_workflow")
+
+# Set Camp Alert to use one_state_workflow (always published when created)
+wf_tool.setChainForPortalTypes(['camp_alert'], 'one_state_workflow')
+print("✓ Camp Alerts set to use one_state_workflow")
 
 # Update security
 wf_tool.updateRoleMappings()

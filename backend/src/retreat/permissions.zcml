@@ -1,0 +1,10 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <!-- Define custom permissions -->
+  <permission
+      id="retreat.AddCampAlert"
+      title="retreat: Add Camp Alert"
+      />
+
+</configure>

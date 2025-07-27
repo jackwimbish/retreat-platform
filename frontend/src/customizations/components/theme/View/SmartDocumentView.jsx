@@ -6,6 +6,7 @@ import React from 'react';
 import DefaultView from '@plone/volto/components/theme/View/DefaultView';
 import IssuesFolderView from './IssuesFolderView';
 import DirectoryView from './DirectoryView';
+import AlertsFolderView from './AlertsFolderView';
 
 const SmartDocumentView = (props) => {
   const { content } = props;
@@ -18,6 +19,12 @@ const SmartDocumentView = (props) => {
   if (content.id === 'directory' || content.title === 'Camp Directory') {
     console.log('Using DirectoryView for directory');
     return <DirectoryView {...props} />;
+  }
+  
+  // Check if this is the alerts folder
+  if (content.id === 'alerts' || content.title === 'Camp Alerts') {
+    console.log('Using AlertsFolderView for alerts');
+    return <AlertsFolderView {...props} />;
   }
   
   // Check if this document contains any issues

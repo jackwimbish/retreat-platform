@@ -1,0 +1,67 @@
+/* Camp Alert Edit Form Styles */
+
+.camp-alert-edit-form {
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.camp-alert-edit-form .ui.header {
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.camp-alert-edit-form .form-section {
+  margin-bottom: 2rem;
+}
+
+.camp-alert-edit-form .form-section h3 {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.camp-alert-edit-form .form-actions {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.camp-alert-edit-form .ui.form .field > label {
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.camp-alert-edit-form .field-help {
+  margin-top: 0.5rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.camp-alert-edit-form .field-help ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.camp-alert-edit-form .field-help li {
+  margin: 0.25rem 0;
+}
+
+.camp-alert-edit-form .ui.message {
+  margin-bottom: 2rem;
+}
+
+/* Alert type message styling */
+.camp-alert-edit-form .ui.red.message {
+  background-color: #fff5f5;
+  border-color: #dc3545;
+}
+
+.camp-alert-edit-form .ui.green.message {
+  background-color: #f5fff5;
+  border-color: #28a745;
+}
+
+.camp-alert-edit-form .ui.blue.message {
+  background-color: #f0f8ff;
+  border-color: #17a2b8;
+}
