@@ -14,8 +14,7 @@ import {
   Label,
   Divider,
   Message,
-  TextArea,
-  Confirm
+  TextArea
 } from 'semantic-ui-react';
 import { FormattedRelativeDate } from '@plone/volto/components';
 import { useSelector } from 'react-redux';
@@ -28,9 +27,6 @@ const IssueActivities = ({ content }) => {
   const [loading, setLoading] = useState(true);
   const [commenting, setCommenting] = useState(false);
   const [comment, setComment] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
   
   const token = useSelector((state) => state.userSession.token);
   const currentUser = useSelector((state) => state.users.user);
@@ -103,64 +99,6 @@ const IssueActivities = ({ content }) => {
     }
   };
 
-  // Update comment
-  const handleUpdateComment = async (activityId) => {
-    if (!editText.trim()) return;
-    
-    try {
-      const contentPath = content['@id'].replace(/^.*\/\/[^\/]+/, '');
-      const apiUrl = `/++api++${contentPath}/@activities/${activityId}`;
-      
-      const response = await fetch(apiUrl, {
-        method: 'PATCH',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ text: editText })
-      });
-      
-      if (response.ok) {
-        setEditingId(null);
-        setEditText('');
-        await fetchActivities();
-        toast.success('Comment updated successfully');
-      } else {
-        toast.error('Failed to update comment');
-      }
-    } catch (error) {
-      console.error('Failed to update comment:', error);
-      toast.error('Failed to update comment');
-    }
-  };
-
-  // Delete comment
-  const handleDeleteComment = async (activityId) => {
-    try {
-      const contentPath = content['@id'].replace(/^.*\/\/[^\/]+/, '');
-      const apiUrl = `/++api++${contentPath}/@activities/${activityId}`;
-      
-      const response = await fetch(apiUrl, {
-        method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        setDeleteConfirm(null);
-        await fetchActivities();
-        toast.success('Comment deleted successfully');
-      } else {
-        toast.error('Failed to delete comment');
-      }
-    } catch (error) {
-      console.error('Failed to delete comment:', error);
-      toast.error('Failed to delete comment');
-    }
-  };
 
   // Format activity message
   const formatActivityMessage = (activity) => {
@@ -258,8 +196,6 @@ const IssueActivities = ({ content }) => {
         ) : (
           activities.map((activity) => {
             const isComment = activity.type === 'comment';
-            const isDeleted = activity.deleted;
-            const isOwn = currentUser?.id === activity.user_id;
             const timestamp = parseTimestamp(activity.timestamp);
             
             return (
@@ -275,50 +211,11 @@ const IssueActivities = ({ content }) => {
                   </Comment.Metadata>
                   <Comment.Text>
                     {isComment ? (
-                      <>
-                        {editingId === activity.id ? (
-                          <Form reply>
-                            <TextArea
-                              value={editText}
-                              onChange={(e) => setEditText(e.target.value)}
-                              rows={3}
-                            />
-                            <Button.Group size="tiny" style={{ marginTop: '10px' }}>
-                              <Button primary onClick={() => handleUpdateComment(activity.id)}>
-                                Save
-                              </Button>
-                              <Button onClick={() => { setEditingId(null); setEditText(''); }}>
-                                Cancel
-                              </Button>
-                            </Button.Group>
-                          </Form>
-                        ) : (
-                          <>
-                            {isDeleted ? (
-                              <em>[This comment has been deleted]</em>
-                            ) : (
-                              activity.data.text
-                            )}
-                          </>
-                        )}
-                      </>
+                      activity.data.text
                     ) : (
                       <em>{formatActivityMessage(activity)}</em>
                     )}
                   </Comment.Text>
-                  {isComment && isOwn && !isDeleted && editingId !== activity.id && (
-                    <Comment.Actions>
-                      <Comment.Action onClick={() => {
-                        setEditingId(activity.id);
-                        setEditText(activity.data.text);
-                      }}>
-                        Edit
-                      </Comment.Action>
-                      <Comment.Action onClick={() => setDeleteConfirm(activity.id)}>
-                        Delete
-                      </Comment.Action>
-                    </Comment.Actions>
-                  )}
                 </Comment.Content>
               </Comment>
             );
@@ -355,14 +252,6 @@ const IssueActivities = ({ content }) => {
         </Message>
       )}
 
-      {/* Delete Confirmation */}
-      <Confirm
-        open={deleteConfirm !== null}
-        content="Are you sure you want to delete this comment?"
-        onCancel={() => setDeleteConfirm(null)}
-        onConfirm={() => handleDeleteComment(deleteConfirm)}
-        size="small"
-      />
     </Segment>
   );
 };

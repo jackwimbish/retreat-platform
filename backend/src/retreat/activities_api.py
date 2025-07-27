@@ -114,12 +114,25 @@ class ActivitiesPost(Service):
         return json_compatible(activity)
 
 
-class ActivityPatch(Service):
+class ActivitiesPatch(Service):
     """Update an existing comment."""
 
     def reply(self):
-        # Extract activity ID from URL
-        activity_id = self.request.get('activity_id')
+        # Extract activity ID from URL path
+        # Try different methods to get the path
+        path_info = self.request.get('PATH_INFO', '')
+        
+        # Also try URL
+        full_url = self.request.get('URL', '')
+        
+        # Try to extract from PATH_INFO first
+        if '/@activities/' in path_info:
+            activity_id = path_info.split('/@activities/')[-1].strip('/')
+        elif '@activities/' in full_url:
+            activity_id = full_url.split('@activities/')[-1].strip('/')
+        else:
+            activity_id = None
+                
         if not activity_id:
             self.request.response.setStatus(400)
             return {'error': 'Activity ID is required'}
@@ -147,12 +160,31 @@ class ActivityPatch(Service):
             return {'error': 'Comment not found or you do not have permission to edit it'}
 
 
-class ActivityDelete(Service):
+class ActivitiesDelete(Service):
     """Soft delete a comment."""
 
     def reply(self):
-        # Extract activity ID from URL
-        activity_id = self.request.get('activity_id')
+        # Extract activity ID from URL path
+        # Try different methods to get the path
+        path_info = self.request.get('PATH_INFO', '')
+        
+        # Also try URL
+        full_url = self.request.get('URL', '')
+        
+        # Log for debugging
+        import logging
+        logger = logging.getLogger('retreat.activities')
+        logger.info(f"DELETE - PATH_INFO: {path_info}")
+        logger.info(f"DELETE - URL: {full_url}")
+        
+        # Try to extract from PATH_INFO first
+        if '/@activities/' in path_info:
+            activity_id = path_info.split('/@activities/')[-1].strip('/')
+        elif '@activities/' in full_url:
+            activity_id = full_url.split('@activities/')[-1].strip('/')
+        else:
+            activity_id = None
+                
         if not activity_id:
             self.request.response.setStatus(400)
             return {'error': 'Activity ID is required'}

@@ -29,7 +29,7 @@ We will build the following six new features on top of the Plone 6.1 foundation:
 
 1. **Full Issue-Tracking System:** A dedicated system for participants to report facility issues (e.g., "The coffee station is empty," "Projector in Room B is not working"). Admins will manage these issues through a dedicated queue with statuses like `New`, `In Progress`, and `Resolved`.
 
-2. **Participant Directory & Profiles:** A searchable directory of all attendees to foster community. Users will have enhanced profiles with custom fields like skills, team/cohort, and social links.
+2. **Participant Directory:** A directory of all attendees and camp staff to foster community.
 
 3. **Resource Booking System:** A calendar-based system for reserving shared facility resources, such as meeting rooms, lab equipment, or vehicles, preventing scheduling conflicts.
 
@@ -37,7 +37,7 @@ We will build the following six new features on top of the Plone 6.1 foundation:
 
 5. **Event Calendar:** A calendar for group events. Admins should be able to post to the calendar, participants should be able to view.
 
-6. **Notifications:** A notification system to alert admins and participants of new issue reports booking confirmations, and calendar events.
+6. **Email Notifications:** A notification system to alert admins and participants of new issue reports.
 
 ## 6. Measures of Success
 

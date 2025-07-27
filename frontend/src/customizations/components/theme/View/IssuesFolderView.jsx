@@ -35,6 +35,7 @@ const IssuesFolderView = (props) => {
   const [issuesWithFullData, setIssuesWithFullData] = useState([]);
   const [uniqueLocations, setUniqueLocations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [creatorNames, setCreatorNames] = useState({});
   
   // Configuration
   const statusConfig = {
@@ -87,7 +88,7 @@ const IssuesFolderView = (props) => {
           headers['Authorization'] = `Bearer ${token}`;
         }
         
-        const searchResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=created&metadata_fields=modified&metadata_fields=location&metadata_fields=status&metadata_fields=priority&b_size=1000&fullobjects=true', {
+        const searchResponse = await fetch('/++api++/@search?portal_type=issue&metadata_fields=created&metadata_fields=modified&metadata_fields=location&metadata_fields=status&metadata_fields=priority&metadata_fields=Creator&b_size=1000&fullobjects=true', {
           headers,
           credentials: 'same-origin',
         });
@@ -116,6 +117,30 @@ const IssuesFolderView = (props) => {
           // Extract unique locations
           const locations = [...new Set(processedIssues.map(i => i.location).filter(Boolean))];
           setUniqueLocations(locations.sort());
+          
+          // Fetch creator names
+          const uniqueCreators = [...new Set(processedIssues.map(i => i.creators?.[0] || i.Creator).filter(Boolean))];
+          const names = {};
+          
+          for (const creatorId of uniqueCreators) {
+            try {
+              // Use any issue's path to call the public endpoint
+              const anyIssuePath = processedIssues[0]['@id'].replace(/^.*\/\/[^\/]+/, '');
+              const response = await fetch(`/++api++${anyIssuePath}/@user-display-name?user_id=${creatorId}`, {
+                headers: { 'Accept': 'application/json' }
+              });
+              if (response.ok) {
+                const data = await response.json();
+                names[creatorId] = data.display_name;
+              } else {
+                names[creatorId] = creatorId;
+              }
+            } catch (error) {
+              names[creatorId] = creatorId;
+            }
+          }
+          
+          setCreatorNames(names);
         }
       } catch (error) {
         console.error('Error fetching issues:', error);
@@ -230,9 +255,9 @@ const IssuesFolderView = (props) => {
           </Label>
         </Table.Cell>
         <Table.Cell>{issue.location || 'Not specified'}</Table.Cell>
-        <Table.Cell className="path-cell">
-          <Icon name="folder outline" />
-          {issue.parentPath || 'Home'}
+        <Table.Cell>
+          <Icon name="user outline" />
+          {creatorNames[issue.creators?.[0] || issue.Creator] || issue.creators?.[0] || issue.Creator || 'Unknown'}
         </Table.Cell>
         <Table.Cell>
           {issue.created ? (
@@ -262,8 +287,8 @@ const IssuesFolderView = (props) => {
               {issue.location || 'Not specified'}
             </div>
             <div>
-              <Icon name="folder outline" />
-              {issue.parentPath || 'Home'}
+              <Icon name="user outline" />
+              {creatorNames[issue.creators?.[0] || issue.Creator] || issue.creators?.[0] || issue.Creator || 'Unknown'}
             </div>
           </Card.Meta>
           <Card.Description>
@@ -428,7 +453,7 @@ const IssuesFolderView = (props) => {
                     <Table.HeaderCell width={2}>Status</Table.HeaderCell>
                     <Table.HeaderCell width={2}>Priority</Table.HeaderCell>
                     <Table.HeaderCell width={2}>Location</Table.HeaderCell>
-                    <Table.HeaderCell width={3}>Path</Table.HeaderCell>
+                    <Table.HeaderCell width={3}>Submitted By</Table.HeaderCell>
                     <Table.HeaderCell width={2}>Created</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>

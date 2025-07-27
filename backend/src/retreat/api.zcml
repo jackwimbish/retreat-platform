@@ -28,16 +28,16 @@
   <plone:service
       method="PATCH"
       for="*"
-      factory=".activities_api.ActivityPatch"
-      name="@activities/{activity_id}"
+      factory=".activities_api.ActivitiesPatch"
+      name="@activities"
       permission="zope2.View"
       />
 
   <plone:service
       method="DELETE"
       for="*"
-      factory=".activities_api.ActivityDelete"
-      name="@activities/{activity_id}"
+      factory=".activities_api.ActivitiesDelete"
+      name="@activities"
       permission="zope2.View"
       />
 
