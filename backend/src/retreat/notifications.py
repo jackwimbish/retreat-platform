@@ -2,6 +2,7 @@
 import os
 import logging
 from plone import api
+from . import activities
 
 logger = logging.getLogger('retreat.notifications')
 
@@ -12,6 +13,19 @@ def notify_new_issue(obj, event):
     # Only process issue content type
     if obj.portal_type != 'issue':
         return
+    
+    # Add initial activity log entry for issue creation
+    try:
+        if hasattr(obj, 'activity_log'):
+            activities.add_activity(obj, 'issue_created', {
+                'title': obj.title,
+                'description': getattr(obj, 'issue_description', ''),
+                'location': getattr(obj, 'location', ''),
+                'priority': getattr(obj, 'priority', 'normal'),
+                'status': getattr(obj, 'status', 'new')
+            })
+    except Exception as e:
+        logger.error(f"Failed to add creation activity: {e}")
     
     # Check if notifications are enabled
     if os.environ.get('ENABLE_ISSUE_NOTIFICATIONS', 'false').lower() != 'true':

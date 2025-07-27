@@ -61,6 +61,19 @@
       &lt;description&gt;Notes about how the issue was resolved&lt;/description&gt;
       &lt;required&gt;False&lt;/required&gt;
     &lt;/field&gt;
+    &lt;field name="assigned_to" type="zope.schema.Choice"&gt;
+      &lt;title&gt;Assigned To&lt;/title&gt;
+      &lt;description&gt;Staff member responsible for this issue&lt;/description&gt;
+      &lt;required&gt;False&lt;/required&gt;
+      &lt;vocabulary&gt;plone.app.vocabularies.Users&lt;/vocabulary&gt;
+    &lt;/field&gt;
+    &lt;field name="activity_log" type="plone.schema.jsonfield.JSONField"&gt;
+      &lt;title&gt;Activity Log&lt;/title&gt;
+      &lt;description&gt;Combined activity and comment history&lt;/description&gt;
+      &lt;required&gt;False&lt;/required&gt;
+      &lt;default&gt;[]&lt;/default&gt;
+      &lt;missing_value&gt;[]&lt;/missing_value&gt;
+    &lt;/field&gt;
   &lt;/schema&gt;
 &lt;/model&gt;
   </property>

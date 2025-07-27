@@ -18,5 +18,14 @@
            zope.lifecycleevent.interfaces.IObjectAddedEvent"
       handler=".notifications.notify_new_issue"
       />
+      
+  <!-- Event subscriber for issue modification tracking -->
+  <subscriber
+      for="zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+      handler=".activities.log_issue_changes"
+      />
+      
+  <!-- Include API configuration -->
+  <include file="api.zcml" />
 
 </configure>

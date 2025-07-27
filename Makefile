@@ -40,7 +40,7 @@ init:
 	@echo "Running initialization scripts..."
 	docker-compose run --rm backend python /app/init_all.py
 	@echo "Starting backend again..."
-	docker-compose start backend
+	docker-compose up -d backend
 
 # Open shell in backend container
 shell-backend:
@@ -74,4 +74,4 @@ run-script:
 	docker-compose stop backend; \
 	docker-compose run --rm backend bash -c "cd /app/instance && zconsole run etc/zope.conf /app/$$script"; \
 	echo "Starting backend again..."; \
-	docker-compose start backend
+	docker-compose up -d backend

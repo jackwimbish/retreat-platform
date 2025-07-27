@@ -20,14 +20,45 @@ import {
 import { FormattedDate } from '@plone/volto/components';
 import { Link } from 'react-router-dom';
 import { flattenToAppURL } from '@plone/volto/helpers';
+import IssueActivities from '../../../../components/IssueActivities/IssueActivities';
 import '../../../../theme/IssueView.css';
 
 const IssueView = (props) => {
   const { content } = props;
+  const [creatorName, setCreatorName] = React.useState('');
   
   // Extract status and priority values
   const statusValue = content.status?.token || content.status || 'new';
   const priorityValue = content.priority?.token || content.priority || 'normal';
+  
+  // Fetch creator's full name
+  React.useEffect(() => {
+    const fetchCreatorName = async () => {
+      if (content.creators && content.creators.length > 0) {
+        const creatorId = content.creators[0];
+        try {
+          // Use the public endpoint to get display name
+          const contentPath = content['@id'].replace(/^.*\/\/[^\/]+/, '');
+          const response = await fetch(`/++api++${contentPath}/@user-display-name?user_id=${creatorId}`, {
+            headers: {
+              'Accept': 'application/json',
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setCreatorName(data.display_name || creatorId);
+          } else {
+            setCreatorName(creatorId);
+          }
+        } catch (error) {
+          console.error('Failed to fetch creator info:', error);
+          setCreatorName(creatorId);
+        }
+      }
+    };
+    
+    fetchCreatorName();
+  }, [content.creators, content['@id']]);
   
   // Status configuration
   const statusConfig = {
@@ -119,6 +150,15 @@ const IssueView = (props) => {
                       <Grid.Column>
                         <List>
                           <List.Item>
+                            <List.Icon name="user outline" />
+                            <List.Content>
+                              <List.Header>Submitted By</List.Header>
+                              <List.Description>
+                                {creatorName || 'Unknown'}
+                              </List.Description>
+                            </List.Content>
+                          </List.Item>
+                          <List.Item>
                             <List.Icon name="calendar plus" />
                             <List.Content>
                               <List.Header>Created</List.Header>
@@ -170,21 +210,23 @@ const IssueView = (props) => {
               </Message>
             )}
 
-            {/* Activity/Comments Section (placeholder for future) */}
-            <Segment>
-              <Header as="h3">
-                <Icon name="comments" />
-                Activity & Comments
-              </Header>
-              <div className="activity-placeholder">
-                <Icon name="comment outline" size="large" disabled />
-                <p>Comments and activity tracking coming soon...</p>
-              </div>
-            </Segment>
+            {/* Activity/Comments Section */}
+            <IssueActivities content={content} />
           </Grid.Column>
 
           {/* Sidebar */}
           <Grid.Column width={5}>
+            {/* Assignment Information */}
+            {content.assigned_to && (
+              <Segment>
+                <Header as="h4">
+                  <Icon name="user" />
+                  Assigned To
+                </Header>
+                <p>{content.assigned_to.title || content.assigned_to.token || content.assigned_to}</p>
+              </Segment>
+            )}
+            
             {/* Status Information */}
             {statusValue !== 'resolved' && (
               <Message info>

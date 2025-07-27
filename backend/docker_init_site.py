@@ -122,6 +122,19 @@ if 'issue' not in portal_types:
       <required>False</required>
       <title>Resolution Notes</title>
     </field>
+    <field name="assigned_to" type="zope.schema.Choice">
+      <title>Assigned To</title>
+      <description>Staff member responsible for this issue</description>
+      <required>False</required>
+      <vocabulary>plone.app.vocabularies.Users</vocabulary>
+    </field>
+    <field name="activity_log" type="plone.schema.jsonfield.JSONField">
+      <title>Activity Log</title>
+      <description>Combined activity and comment history</description>
+      <required>False</required>
+      <default>[]</default>
+      <missing_value>[]</missing_value>
+    </field>
   </schema>
 </model>
 """
@@ -411,18 +424,20 @@ print("\n>>> Setting up simplified workflow...")
 # Get workflow tool
 wf_tool = getToolByName(plone, 'portal_workflow')
 
-# Set Issue to use simple_publication_workflow
-wf_tool.setChainForPortalTypes(['issue'], 'simple_publication_workflow')
+# Set Issue to use one_state_workflow (always published)
+wf_tool.setChainForPortalTypes(['issue'], 'one_state_workflow')
 
 # Update workflow so new issues are automatically published
-workflow = wf_tool.getWorkflowById('simple_publication_workflow')
+workflow = wf_tool.getWorkflowById('one_state_workflow')
 if workflow:
-    # This is handled in the frontend now, but keeping for reference
-    print("✓ Issues set to use simple_publication_workflow")
+    print("✓ Issues set to use one_state_workflow")
+else:
+    print("! Warning: one_state_workflow not found, falling back to simple_publication_workflow")
+    wf_tool.setChainForPortalTypes(['issue'], 'simple_publication_workflow')
 
-# Set Participant to use simple_publication_workflow too
-wf_tool.setChainForPortalTypes(['participant'], 'simple_publication_workflow')
-print("✓ Participants set to use simple_publication_workflow")
+# Set Participant to use one_state_workflow too
+wf_tool.setChainForPortalTypes(['participant'], 'one_state_workflow')
+print("✓ Participants set to use one_state_workflow")
 
 # Update security
 wf_tool.updateRoleMappings()
