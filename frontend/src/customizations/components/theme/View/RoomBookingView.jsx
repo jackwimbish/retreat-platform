@@ -60,7 +60,11 @@ const RoomBookingView = (props) => {
     setError(null);
     
     try {
-      const response = await fetch(`/++api++${content['@id'].replace(window.location.origin, '')}`, {
+      // Extract booking ID from content
+      const bookingId = content.id || content['@id'].split('/').pop();
+      
+      // Use custom cancel endpoint for OAuth compatibility
+      const response = await fetch(`/++api++/@cancel-booking/${bookingId}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',
@@ -68,13 +72,14 @@ const RoomBookingView = (props) => {
         }
       });
 
-      if (response.ok || response.status === 204) {
+      const data = await response.json();
+      
+      if (response.ok) {
         // Redirect to conference rooms page after successful cancellation
         history.push('/conference-rooms');
       } else {
-        const errorText = await response.text();
-        console.error('Failed to cancel booking:', response.status, errorText);
-        setError('Failed to cancel booking. Please try again.');
+        console.error('Failed to cancel booking:', response.status, data);
+        setError(data.error || 'Failed to cancel booking. Please try again.');
       }
     } catch (error) {
       console.error('Error cancelling booking:', error);

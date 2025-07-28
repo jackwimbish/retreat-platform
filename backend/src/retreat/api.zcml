@@ -50,4 +50,22 @@
       permission="zope.Public"
       />
 
+  <!-- Custom booking cancellation endpoint for OAuth users -->
+  <plone:service
+      method="DELETE"
+      for="*"
+      factory=".booking_api.CancelBooking"
+      name="@cancel-booking"
+      permission="zope2.View"
+      />
+
+  <!-- Get current user's bookings -->
+  <plone:service
+      method="GET"
+      for="*"
+      factory=".booking_api.MyBookings"
+      name="@my-bookings"
+      permission="zope2.View"
+      />
+
 </configure>
